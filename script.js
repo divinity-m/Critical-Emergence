@@ -9,7 +9,7 @@ window.addEventListener('resize', resizeCnv);
 
 // Variables
 let player = {
-    x: cnv.width/2, y: cnv.height/2, r: 20, speed: 5, baseSpeed: 5, color: "#FFFFF", subColor: "#E6E6E6",
+    x: cnv.width/2, y: cnv.height/2, r: 15, speed: 5, baseSpeed: 5, color: "#FFFFFF", subColor: "#E6E6E6",
 }
 let now = Date.now();
 let dash = {
