@@ -18,7 +18,7 @@ let dash = {
         player.speed += this.accel;
         player.color = "#E6E6E6";
         player.subColor = "#FFFFFF";
-        if (player.speed >= player.baseSpeed*2 && this.accel === 1) this.accel = -1;
+        if (player.speed >= player.baseSpeed*3 && this.accel === 1) this.accel = -1;
         if (this.accel === -1 && player.speed <= player.baseSpeed) {
             player.speed = player.baseSpeed;    
             player.color = "#FFFFFF";
@@ -62,7 +62,7 @@ function circle(x, y, r, type) {
     else ctx.fill();
 }
 
-console.log("dashing cooldown");
+console.log("border");
 function draw() {
     now = Date.now();
     // Background #RRGGBBAA
@@ -75,19 +75,19 @@ function draw() {
     if (now - dash.lastEnded <= 1500) {
         ctx.fillStyle = "#FFFFFF";
         ctx.beginPath();
-        ctx.roundRect(cnv.width-175, cnv.height/2-5, 150, 10, 5);
+        ctx.roundRect(cnv.width-175, cnv.height/2-6.25, 150, 12.5, 6.25);
         ctx.stroke();
         ctx.beginPath();
-        ctx.roundRect(cnv.width-175, cnv.height/2-5, 150-(now-dash.lastEnded)/10, 10, 5);
+        ctx.roundRect(cnv.width-175, cnv.height/2-6.25, 150-(now-dash.lastEnded)/10, 12.5, 6.25);
         ctx.fill();
 
         ctx.fillStyle = "#E6E6E6";
+        ctx.font = "15px Verdana";
+        ctx.textAlign = "right";
+        ctx.fillText("Dash", cnv.width-185, cnv.height/2+5);
         ctx.font = "10px Verdana";
-        ctx.textAlight = "right";
-        ctx.fillText("Dash", cnv.width-185, cnv.height/2-5);
-        ctx.font = "7.5px Verdana";
-        ctx.textAlight = "center";
-        ctx.fillText(`${(1.5-(now-dash.lastEnded)/1000).toFixed(2)}s`, cnv.width-100, cnv.height/2-3.75);
+        ctx.textAlign = "center";
+        ctx.fillText(`${(1.5-(now-dash.lastEnded)/1000).toFixed(2)}s`, cnv.width-100, cnv.height/2+10/3);
         
     }
 
@@ -97,6 +97,11 @@ function draw() {
     ctx.lineWidth = 2;
     circle(player.x, player.y, player.r, "fill");
     circle(player.x, player.y, player.r, "stroke");
+    keyboardMovement();
+    player.x = Math.max(player.x, player.r);
+    player.x = Math.min(player.x, cnv.width-player.r);
+    player.y = Math.max(player.y, player.r);
+    player.y = Math.min(player.y, cnv.height-player.r);
     
     requestAnimationFrame(draw);
 }
