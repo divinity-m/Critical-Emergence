@@ -69,7 +69,7 @@ function draw() {
     ctx.fillStyle = "#C8C8C8";
     ctx.fillRect(0, 0, cnv.width, cnv.height);
     ctx.strokeStyle = "#E8E8E8";
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 5;
     ctx.strokeRect(0, 0, cnv.width, cnv.height);
 
     // Dashing
@@ -101,10 +101,10 @@ function draw() {
     circle(player.x, player.y, player.r, "fill");
     circle(player.x, player.y, player.r, "stroke");
     keyboardMovement();
-    player.x = Math.max(player.x, player.r+2);
-    player.x = Math.min(player.x, cnv.width-player.r-2);
-    player.y = Math.max(player.y, player.r+2);
-    player.y = Math.min(player.y, cnv.height-player.r-2);
+    player.x = Math.max(player.x, player.r+5);
+    player.x = Math.min(player.x, cnv.width-player.r-5);
+    player.y = Math.max(player.y, player.r+5);
+    player.y = Math.min(player.y, cnv.height-player.r-5);
     
     requestAnimationFrame(draw);
 }
