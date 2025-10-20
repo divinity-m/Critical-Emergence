@@ -16,11 +16,13 @@ let dash = {
     activated: false, accel: 1, lastEnded: 0,
     use: function() {  
         player.speed += this.accel;
-        player.color = #E6E6E6;
-        player.subColor = #FFFFF;
+        player.color = "#E6E6E6";
+        player.subColor = "#FFFFFF";
         if (player.speed >= player.baseSpeed*2 && this.accel === 1) this.accel = -1;
         if (this.accel === -1 && player.speed <= player.baseSpeed) {
-            player.speed = player.baseSpeed;
+            player.speed = player.baseSpeed;    
+            player.color = "#FFFFFF";
+            player.subColor = "#E6E6E6";
             this.activated = false;
             this.accel = 1;
             this.lastEnded = Date.now();
