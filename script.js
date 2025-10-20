@@ -7,6 +7,13 @@ function resizeCnv() { cnv.width = window.innerWidth; cnv.height = window.innerH
 resizeCnv();
 window.addEventListener('resize', resizeCnv);
 
+// Variables
+let player = {
+    x: cnv.width/2, y: cnv.height/2, r: 20, speed: 5, baseSpeed: 5, color: "#FFFFF", subColor: "#E6E6E6",
+}
+let now = Date.now();
+let dash = {activated: false, accel: 1, lastEnded: 0,};
+
 // Controls
 document.addEventListener('keydown', keyDownEventListener);
 document.addEventListener('keyup', keyUpEventListener);
@@ -16,7 +23,7 @@ function keyDownEventListener(e) {
     if (e.code === "KeyA" || e.code === "ArrowLeft") moveLeft = true;
     if (e.code === "KeyS" || e.code === "ArrowDown") moveDown = true;
     if (e.code === "KeyD" || e.code === "ArrowRight") moveRight = true;
-    if (e.code === "KeyQ") dash();
+    if (e.code === "KeyQ" && now - dash.lastEnded > 3000) dash.activated = true;
 }
 function keyUpEventListener(e) {
     if (e.code === "KeyW" || e.code === "ArrowUp") moveUp = false;
@@ -31,14 +38,20 @@ function keyboardMovement() {
     if (moveRight) player.x += player.speed;
 }
 function dash() {
-    console.log("dash");
+    player.speed += dash.accel;
+    player.color = #E6E6E6;
+    player.subColor = #FFFFF;
+    
+    if (player.speed >= player.baseSpeed*2 && dash.accel === 1) dash.accel = -1;
+    
+    if (dash.accel === -1 && player.speed <= player.baseSpeed) {
+        dash.activated = false;
+        player.speed = player.baseSpeed;
+        dash.accel = 1;
+        dash.lastEnded = Date.now();
+    }
 }
-
-// Variables
-let player = {
-    x: cnv.width/2, y: cnv.height/2, r: 20, speed: 5, baseSpeed: 5, color: "#FFFFF", subColor: "#E6E6E6",
-}
-let now = Date.now();
+console.log("dashing");
 
 // Quick Draw functions
 function cricle(x, y, r, type) {
@@ -60,6 +73,9 @@ function draw() {
     ctx.lineWidth = 2;
     circle(player.x, player.y, player.r, "fill");
     circle(player.x, player.y, player.r, "stroke");
+
+    // Dashing
+    if (dash.activated) dash();
     
     requestAnimationFrame(draw);
 }
