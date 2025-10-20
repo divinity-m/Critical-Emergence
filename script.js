@@ -68,6 +68,9 @@ function draw() {
     // Background #RRGGBBAA
     ctx.fillStyle = "#C8C8C8";
     ctx.fillRect(0, 0, cnv.width, cnv.height);
+    ctx.strokeStyle = "#E8E8E8";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(0, 0, cnv.width, cnv.height);
 
     // Dashing
     if (dash.activated) dash.use();
