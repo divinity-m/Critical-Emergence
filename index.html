@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" class="no-cursor">
+    <head>
+        <title>Critical Emergence</title>
+
+        <!-- CSS -->
+        <style>
+            html, body {
+                height: 100%;
+                margin: 0;
+                overflow: hidden;
+                touch-action: none; /* disable gestures like pinch or pan */
+                overscroll-behavior: none; /* prevent edge bounce */
+            }
+            #canvas {
+                width: 100vw;
+                height: 100vh;
+                display: block;
+                pointer-events: none;
+                -webkit-user-select: none; /* for highlighting over text */
+                user-select: none; /* same as above */
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Canvas -->
+        <canvas id="canvas"></canvas>
+    </body>
+</html>
