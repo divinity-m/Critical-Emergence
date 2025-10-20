@@ -60,7 +60,7 @@ function cricle(x, y, r, type) {
     else ctx.fill();
 }
 function dash() {
-    console.log(dash);
+    console.log("dash");
 }
 
 
