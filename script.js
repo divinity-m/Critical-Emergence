@@ -54,7 +54,7 @@ function dash() {
 console.log("dashing");
 
 // Quick Draw functions
-function cricle(x, y, r, type) {
+function circle(x, y, r, type) {
     ctx.beginPath();
     ctx.arc(x, y, r, Math.PI*2, 0);
     if (type === "stroke") ctx.stroke();
