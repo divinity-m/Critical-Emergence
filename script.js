@@ -12,7 +12,21 @@ let player = {
     x: cnv.width/2, y: cnv.height/2, r: 20, speed: 5, baseSpeed: 5, color: "#FFFFF", subColor: "#E6E6E6",
 }
 let now = Date.now();
-let dash = {activated: false, accel: 1, lastEnded: 0,};
+let dash = {
+    activated: false, accel: 1, lastEnded: 0,
+    use: function() {  
+        player.speed += this.accel;
+        player.color = #E6E6E6;
+        player.subColor = #FFFFF;
+        if (player.speed >= player.baseSpeed*2 && this.accel === 1) this.accel = -1;
+        if (this.accel === -1 && player.speed <= player.baseSpeed) {
+            player.speed = player.baseSpeed;
+            this.activated = false;
+            this.accel = 1;
+            this.lastEnded = Date.now();
+        }
+    }
+};
 
 // Controls
 document.addEventListener('keydown', keyDownEventListener);
@@ -37,20 +51,6 @@ function keyboardMovement() {
     if (moveDown) player.y += player.speed;
     if (moveRight) player.x += player.speed;
 }
-function dash() {
-    player.speed += dash.accel;
-    player.color = #E6E6E6;
-    player.subColor = #FFFFF;
-    
-    if (player.speed >= player.baseSpeed*2 && dash.accel === 1) dash.accel = -1;
-    
-    if (dash.accel === -1 && player.speed <= player.baseSpeed) {
-        dash.activated = false;
-        player.speed = player.baseSpeed;
-        dash.accel = 1;
-        dash.lastEnded = Date.now();
-    }
-}
 
 // Quick Draw functions
 function circle(x, y, r, type) {
@@ -68,7 +68,7 @@ function draw() {
     ctx.fillRect(0, 0, cnv.width, cnv.height);
 
     // Dashing
-    if (dash.activated) dash();
+    if (dash.activated) dash.use();
 
     if (now - dash.lastEnded <= 1500) {
         ctx.fillStyle = "#FFFFFF";
