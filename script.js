@@ -2,6 +2,7 @@
 const cnv = document.getElementById('canvas');
 const ctx = cnv.getContext('2d');
 
+// Resizing the canvas
 function resizeCnv() { cnv.width = window.innerWidth; cnv.height = window.innerHeight; }
 resizeCnv();
 window.addEventListener('resize', resizeCnv);
@@ -29,12 +30,23 @@ function keyboardMovement() {
     if (moveDown) player.y += player.speed;
     if (moveRight) player.x += player.speed;
 }
+function dash() {
+    console.log("dash");
+}
 
-
+// Variables
 let player = {
     x: cnv.width/2, y: cnv.height/2, r: 20, speed: 5, baseSpeed: 5, color: "#FFFFF", subColor: "#E6E6E6",
 }
 let now = Date.now();
+
+// Quick Draw functions
+function cricle(x, y, r, type) {
+    ctx.beginPath();
+    ctx.arc(x, y, r, Math.PI*2, 0);
+    if (type === "stroke") ctx.stroke();
+    else ctx.fill();
+}
 
 function draw() {
     now = Date.now();
@@ -51,17 +63,6 @@ function draw() {
     
     requestAnimationFrame(draw);
 }
-draw()
 
-function cricle(x, y, r, type) {
-    ctx.beginPath();
-    ctx.arc(x, y, r, Math.PI*2, 0);
-    if (type === "stroke") ctx.stroke();
-    else ctx.fill();
-}
-function dash() {
-    console.log("dash");
-}
-
-
+draw();
 
