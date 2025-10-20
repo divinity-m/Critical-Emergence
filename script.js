@@ -23,7 +23,7 @@ function keyDownEventListener(e) {
     if (e.code === "KeyA" || e.code === "ArrowLeft") moveLeft = true;
     if (e.code === "KeyS" || e.code === "ArrowDown") moveDown = true;
     if (e.code === "KeyD" || e.code === "ArrowRight") moveRight = true;
-    if (e.code === "KeyQ" && now - dash.lastEnded > 3000) dash.activated = true;
+    if (e.code === "KeyQ" && now - dash.lastEnded > 1500) dash.activated = true;
 }
 function keyUpEventListener(e) {
     if (e.code === "KeyW" || e.code === "ArrowUp") moveUp = false;
@@ -51,7 +51,6 @@ function dash() {
         dash.lastEnded = Date.now();
     }
 }
-console.log("dashing");
 
 // Quick Draw functions
 function circle(x, y, r, type) {
@@ -61,11 +60,34 @@ function circle(x, y, r, type) {
     else ctx.fill();
 }
 
+console.log("dashing cooldown");
 function draw() {
     now = Date.now();
     // Background #RRGGBBAA
     ctx.fillStyle = "#C8C8C8";
     ctx.fillRect(0, 0, cnv.width, cnv.height);
+
+    // Dashing
+    if (dash.activated) dash();
+
+    if (now - dash.lastEnded <= 1500) {
+        ctx.fillStyle = "#FFFFFF";
+        ctx.beginPath();
+        ctx.roundRect(cnv.width-175, cnv.height/2-5, 150, 10, 5);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.roundRect(cnv.width-175, cnv.height/2-5, 150-(now-dash.lastEnded)/10, 10, 5);
+        ctx.fill();
+
+        ctx.fillStyle = "#E6E6E6";
+        ctx.font = "10px Verdana";
+        ctx.textAlight = "right";
+        ctx.fillText("Dash", cnv.width-185, cnv.height/2-5);
+        ctx.font = "7.5px Verdana";
+        ctx.textAlight = "center";
+        ctx.fillText(`${(1.5-(now-dash.lastEnded)/1000).toFixed(2)}s`, cnv.width-100, cnv.height/2-3.75);
+        
+    }
 
     // Player
     ctx.fillStyle = player.color;
@@ -73,9 +95,6 @@ function draw() {
     ctx.lineWidth = 2;
     circle(player.x, player.y, player.r, "fill");
     circle(player.x, player.y, player.r, "stroke");
-
-    // Dashing
-    if (dash.activated) dash();
     
     requestAnimationFrame(draw);
 }
