@@ -9,7 +9,7 @@ window.addEventListener('resize', resizeCnv);
 
 // Variables
 let player = {
-    x: cnv.width/2, y: cnv.height/2, r: 15, speed: 5, baseSpeed: 5, color: "#FFFFFF", subColor: "#E6E6E6",
+    x: cnv.width/2, y: cnv.height/2, r: 15, speed: 3, baseSpeed: 3, color: "#FFFFFF", subColor: "#E6E6E6",
 }
 let now = Date.now();
 let dash = {
@@ -77,6 +77,7 @@ function draw() {
 
     if (now - dash.lastEnded <= 1500) {
         ctx.fillStyle = "#FFFFFF";
+        ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.roundRect(cnv.width-175, cnv.height/2-6.25, 150, 12.5, 6.25);
         ctx.stroke();
@@ -91,7 +92,20 @@ function draw() {
         ctx.font = "10px Verdana";
         ctx.textAlign = "center";
         ctx.fillText(`${(1.5-(now-dash.lastEnded)/1000).toFixed(2)}s`, cnv.width-100, cnv.height/2+10/3);
-        
+    }
+
+    // Sword Statue
+    ctx.fillStyle = "#FF000050";
+    ctx.strokeStyle = "#FF0000";
+    ctx.lineWidth = 2.5;
+    ctx.fillRect(cnv.width*3/4, cnv.height/2-15, 30, 30);
+    ctx.strokeRect(cnv.width*3/4, cnv.height/2-15, 30, 30);
+    let distSword = Math.hypot(player.x - cnv.width*3/4 + 15, player.y - cnv.height/2);
+    if (distSword < 100) {
+        ctx.fillStyle = "#FF0000";
+        ctx.textAlign = "center";
+        ctx.font = "bold 15px Verdana";
+        ctx.fillText("Equip Sword", cnv.width*3/4+15, cnv.height/2+40);
     }
 
     // Player
@@ -105,7 +119,8 @@ function draw() {
     player.x = Math.min(player.x, cnv.width-player.r-5);
     player.y = Math.max(player.y, player.r+5);
     player.y = Math.min(player.y, cnv.height-player.r-5);
-    
+
+    // Animate
     requestAnimationFrame(draw);
 }
 
