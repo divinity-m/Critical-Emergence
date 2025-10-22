@@ -9,7 +9,7 @@ window.addEventListener('resize', resizeCnv);
 
 // Variables
 let player = {
-    x: cnv.width/2, y: cnv.height/2, r: 15, speed: 3, baseSpeed: 3, color: "#FFFFFF", subColor: "#E6E6E6",
+    x: cnv.width/2, y: cnv.height/2, r: 15, speed: cnv.width/275, baseSpeed: cnv.width/275, color: "#FFFFFF", subColor: "#E6E6E6",
 }
 let now = Date.now();
 let mapY = 0, mapX = 0;
@@ -49,10 +49,20 @@ function keyUpEventListener(e) {
     if (e.code === "KeyD" || e.code === "ArrowRight") moveRight = false;
 }
 function keyboardMovement() {
-    if (moveUp) player.y -= player.speed;
-    if (moveLeft) player.x -= player.speed;
-    if (moveDown) player.y += player.speed;
-    if (moveRight) player.x += player.speed;
+    let xKb = 0; yKb = 0;
+    
+    if (moveRight) xKb += 1;
+    if (moveLeft) xKb -= 1;
+    if (moveDown) yKb += 1;
+    if (moveUp) yKb -= 1;
+
+    if (xKb != 0 && yKb != 0) {
+        xKb *= Math.SQRT1_2;
+        yKb *= Math.SQRT1_2;
+    }
+
+    player.x += xKb * player.speed;
+    player.y += yKb * player.speed;
 }
 
 // Quick Draw functions
@@ -63,7 +73,7 @@ function circle(x, y, r, type) {
     else ctx.fill();
 }
 
-console.log("scrolling");
+console.log("scrolling left and right");
 function draw() {
     now = Date.now();
     // Background #RRGGBBAA
@@ -76,10 +86,12 @@ function draw() {
     ctx.strokeStyle = "#FFFFFF";
     ctx.lineWidth = 2.5;
     ctx.strokeRect(5, 5, cnv.width-10, cnv.height-10);
-    // Camera Scrolling
+    // Movement
     keyboardMovement();
-    if (player.y < 100) { player.y = Math.max(player.y, 100); mapY++; }
-    if (player.y > cnv.height-100) { player.y = Math.min(player.y, cnv.height-100); mapY--; }
+    if (player.x < 100) { player.x = Math.max(player.x, 100); mapX += player.speed; }
+    if (player.x > cnv.width-100) { player.x = Math.min(player.x, cnv.width-100); mapX -= player.speed; }
+    if (player.y < 100) { player.y = Math.max(player.y, 100); mapY += player.speed; }
+    if (player.y > cnv.height-100) { player.y = Math.min(player.y, cnv.height-100); mapY -= player.speed; }
 
     // Dashing
     if (dash.activated) dash.use();
@@ -109,12 +121,16 @@ function draw() {
     ctx.lineWidth = 2.5;
     ctx.fillRect(cnv.width*3/4+mapX, cnv.height/2-15+mapY, 30, 30);
     ctx.strokeRect(cnv.width*3/4+mapX, cnv.height/2-15+mapY, 30, 30);
-    let distSword = Math.hypot(player.x - cnv.width*3/4+mapX + 15, player.y - cnv.height/2+mapY);
+    let distSword = Math.hypot(player.x - (cnv.width*3/4+15+mapX), player.y - (cnv.height/2+mapY));
     if (distSword < 100) {
+        ctx.lineWidth = 1.25;
+        ctx.fillRect(cnv.width*3/4-40+mapX, cnv.height/2+25+mapY, 110, 20);
+        ctx.strokeRect(cnv.width*3/4-40+mapX, cnv.height/2+25+mapY, 110, 20);
+        
         ctx.fillStyle = "#FF0000";
         ctx.textAlign = "center";
         ctx.font = "bold 15px Verdana";
-        ctx.fillText("Equip Sword", cnv.width*3/4+15, cnv.height/2+40);
+        ctx.fillText("Equip Sword", cnv.width*3/4+15+mapX, cnv.height/2+40+mapY);
     }
 
     // Player
@@ -123,10 +139,6 @@ function draw() {
     ctx.lineWidth = 2;
     circle(player.x, player.y, player.r, "fill");
     circle(player.x, player.y, player.r, "stroke");
-    player.x = Math.max(player.x, player.r+5);
-    player.x = Math.min(player.x, cnv.width-player.r-5);
-    player.y = Math.max(player.y, player.r+5);
-    player.y = Math.min(player.y, cnv.height-player.r-5);
 
     // Animate
     requestAnimationFrame(draw);
