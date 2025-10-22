@@ -73,7 +73,7 @@ function circle(x, y, r, type) {
     else ctx.fill();
 }
 
-console.log("scrolling left and right");
+console.log("rezised box");
 function draw() {
     now = Date.now();
     // Background #RRGGBBAA
@@ -119,18 +119,18 @@ function draw() {
     ctx.fillStyle = "#FF000050";
     ctx.strokeStyle = "#FF0000";
     ctx.lineWidth = 2.5;
-    ctx.fillRect(cnv.width*3/4+mapX, cnv.height/2-15+mapY, 30, 30);
-    ctx.strokeRect(cnv.width*3/4+mapX, cnv.height/2-15+mapY, 30, 30);
-    let distSword = Math.hypot(player.x - (cnv.width*3/4+15+mapX), player.y - (cnv.height/2+mapY));
+    ctx.fillRect(cnv.width*3/4+mapX, cnv.height/2-22.5+mapY, 45, 45);
+    ctx.strokeRect(cnv.width*3/4+mapX, cnv.height/2-22.5+mapY, 45, 45);
+    let distSword = Math.hypot(player.x - (cnv.width*3/4+22.5+mapX), player.y - (cnv.height/2+mapY));
     if (distSword < 100) {
         ctx.lineWidth = 1.25;
-        ctx.fillRect(cnv.width*3/4-40+mapX, cnv.height/2+25+mapY, 110, 20);
-        ctx.strokeRect(cnv.width*3/4-40+mapX, cnv.height/2+25+mapY, 110, 20);
+        ctx.fillRect(cnv.width*3/4-32.5+mapX, cnv.height/2+35+mapY, 110, 20);
+        ctx.strokeRect(cnv.width*3/4-32.5+mapX, cnv.height/2+35+mapY, 110, 20);
         
         ctx.fillStyle = "#FF0000";
         ctx.textAlign = "center";
         ctx.font = "bold 15px Verdana";
-        ctx.fillText("Equip Sword", cnv.width*3/4+15+mapX, cnv.height/2+40+mapY);
+        ctx.fillText("Equip Sword", cnv.width*3/4+22.5+mapX, cnv.height/2+50+mapY);
     }
 
     // Player
