@@ -12,6 +12,7 @@ let player = {
     x: cnv.width/2, y: cnv.height/2, r: 15, speed: 3, baseSpeed: 3, color: "#FFFFFF", subColor: "#E6E6E6",
 }
 let now = Date.now();
+let mapY = 0, mapX = 0;
 let dash = {
     activated: false, accel: 1, lastEnded: 0,
     use: function() {  
@@ -62,15 +63,23 @@ function circle(x, y, r, type) {
     else ctx.fill();
 }
 
-console.log("border");
+console.log("scrolling");
 function draw() {
     now = Date.now();
     // Background #RRGGBBAA
     ctx.fillStyle = "#C8C8C8";
     ctx.fillRect(0, 0, cnv.width, cnv.height);
-    ctx.strokeStyle = "#E8E8E8";
-    ctx.lineWidth = 5;
-    ctx.strokeRect(0, 0, cnv.width, cnv.height);
+    // Border
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 10;
+    ctx.strokeRect(5, 5, cnv.width-10, cnv.height-10);
+    ctx.strokeStyle = "#FFFFFF";
+    ctx.lineWidth = 2.5;
+    ctx.strokeRect(5, 5, cnv.width-10, cnv.height-10);
+    // Camera Scrolling
+    keyboardMovement();
+    if (player.y < 100) { player.y = Math.max(player.y, 100); mapY++; }
+    if (player.y > cnv.height-100) { player.y = Math.min(player.y, cnv.height-100); mapY--; }
 
     // Dashing
     if (dash.activated) dash.use();
@@ -98,9 +107,9 @@ function draw() {
     ctx.fillStyle = "#FF000050";
     ctx.strokeStyle = "#FF0000";
     ctx.lineWidth = 2.5;
-    ctx.fillRect(cnv.width*3/4, cnv.height/2-15, 30, 30);
-    ctx.strokeRect(cnv.width*3/4, cnv.height/2-15, 30, 30);
-    let distSword = Math.hypot(player.x - cnv.width*3/4 + 15, player.y - cnv.height/2);
+    ctx.fillRect(cnv.width*3/4+mapX, cnv.height/2-15+mapY, 30, 30);
+    ctx.strokeRect(cnv.width*3/4+mapX, cnv.height/2-15+mapY, 30, 30);
+    let distSword = Math.hypot(player.x - cnv.width*3/4+mapX + 15, player.y - cnv.height/2+mapY);
     if (distSword < 100) {
         ctx.fillStyle = "#FF0000";
         ctx.textAlign = "center";
@@ -114,7 +123,6 @@ function draw() {
     ctx.lineWidth = 2;
     circle(player.x, player.y, player.r, "fill");
     circle(player.x, player.y, player.r, "stroke");
-    keyboardMovement();
     player.x = Math.max(player.x, player.r+5);
     player.x = Math.min(player.x, cnv.width-player.r-5);
     player.y = Math.max(player.y, player.r+5);
