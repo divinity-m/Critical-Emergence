@@ -46,7 +46,7 @@ function detectHover() {
         && mouseY > cnv.height*0.5+60+mapY && mouseY < cnv.height*0.5+60+mapY + 20);
 }
 function clickEventListener(e) {
-    if (mouseover.equipSword) player.color = "#FF0000";
+    if (mouseover.equipSword) { player.color = "#FF0000"; player.subColor = "#E60000"};
 }
 
 // Controls
