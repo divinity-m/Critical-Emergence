@@ -9,7 +9,7 @@ window.addEventListener('resize', resizeCnv);
 
 // Variables
 let player = {
-    x: cnv.width*0.5, y: cnv.height*0.5, r: 15, speed: cnv.width*0.575, baseSpeed: cnv.width/275, color: "#FFFFFF", subColor: "#E6E6E6",
+    x: cnv.width*0.5, y: cnv.height*0.5, r: 15, speed: cnv.width/275, baseSpeed: cnv.width/275, color: "#FFFFFF", subColor: "#E6E6E6",
 }
 let now = Date.now();
 let mapY = 0, mapX = 0;
@@ -91,7 +91,7 @@ function circle(x, y, r, type) {
     else ctx.fill();
 }
 
-console.log("mous");
+console.log("mou");
 function draw() {
     now = Date.now();
     detectHover();
