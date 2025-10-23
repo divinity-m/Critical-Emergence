@@ -43,8 +43,8 @@ function mousemoveEventListener(e) {
     if (track) console.log(`(${mouseX}, ${mouseY})`);
 }
 function detectHover() {
-    mouseover.equipSword = (mouseX > cnv.width*0.75-5+mapX && mouseX < cnv.width*0.75-5+mapX+110
-        && mouseY > cnv.height*0.5+60+mapY && mouseY < cnv.height*0.5+60+mapY + 20);
+    mouseover.equipSword = (mouseX > 1150-5+mapX && mouseX < 1150-5+mapX+110
+        && mouseY > 432+60+mapY && mouseY < 432+60+mapY+20);
 }
 function clickEventListener(e) {
     if (mouseover.equipSword) { player.color = "#FF0000"; player.subColor = "#E60000"};
@@ -139,20 +139,20 @@ function draw() {
     ctx.fillStyle = "#FF000050";
     ctx.strokeStyle = "#FF0000";
     ctx.lineWidth = 2.5;
-    ctx.fillRect(cnv.width*0.75+mapX, cnv.height*0.5-50+mapY, 100, 100);
-    ctx.drawImage(document.getElementById("sword-icon"), cnv.width*0.75+mapX, cnv.height*0.5-50+mapY, 100, 100);
-    ctx.strokeRect(cnv.width*0.75+mapX, cnv.height*0.5-50+mapY, 100, 100);
-    let distSword = Math.hypot(player.x - (cnv.width*0.75+50+mapX), player.y - (cnv.height*0.5+mapY));
+    ctx.fillRect(1150+mapX, 432-50+mapY, 100, 100); // 432 is cnv.height/2 for me
+    ctx.drawImage(document.getElementById("sword-icon"), 1150+mapX, 432-50+mapY, 100, 100);
+    ctx.strokeRect(1150+mapX, 432-50+mapY, 100, 100);
+    let distSword = Math.hypot(player.x - (1150+50+mapX), player.y - (432+mapY));
     if (distSword < 150) {
         ctx.lineWidth = 1.25;
         if (mouseover.equipSword) ctx.fillStyle = "#FF000025";
-        ctx.fillRect(cnv.width*0.75-5+mapX, cnv.height*0.5+60+mapY, 110, 20);
-        ctx.strokeRect(cnv.width*0.75-5+mapX, cnv.height*0.5+60+mapY, 110, 20);
+        ctx.fillRect(1150-5+mapX, 432+60+mapY, 110, 20);
+        ctx.strokeRect(1150-5+mapX, 432+60+mapY, 110, 20);
         
         ctx.fillStyle = "#FF0000";
         ctx.textAlign = "center";
         ctx.font = "bold 15px Verdana";
-        ctx.fillText("Equip Sword", cnv.width*0.75+50+mapX, cnv.height*0.5+75+mapY);
+        ctx.fillText("Equip Sword", 1150+50+mapX, 432+75+mapY);
     }
 
     // Player
