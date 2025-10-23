@@ -91,7 +91,7 @@ function circle(x, y, r, type) {
     else ctx.fill();
 }
 
-console.log("sword icon");
+console.log("mouse");
 function draw() {
     now = Date.now();
     detectHover();
