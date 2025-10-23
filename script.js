@@ -43,8 +43,8 @@ function mousemoveEventListener(e) {
     if (track) console.log(`(${mouseX}, ${mouseY})`);
 }
 function detectHover() {
-    mouseover.equipSword = (mouseX > 1150-5+mapX && mouseX < 1150-5+mapX+110
-        && mouseY > 432+60+mapY && mouseY < 432+60+mapY+20);
+    let distSword = Math.hypot(player.x - (1150+50+mapX), player.y - (432+mapY));
+    mouseover.equipSword = distSword < 150 && mouseX > 1150-5+mapX && mouseX < 1150-5+mapX+110 && mouseY > 432+60+mapY && mouseY < 432+60+mapY+20;
 }
 function clickEventListener(e) {
     if (mouseover.equipSword) { player.color = "#FF0000"; player.subColor = "#E60000"};
