@@ -73,7 +73,7 @@ function circle(x, y, r, type) {
     else ctx.fill();
 }
 
-console.log("rezised box");
+console.log("sword icon");
 function draw() {
     now = Date.now();
     // Background #RRGGBBAA
