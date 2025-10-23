@@ -34,12 +34,12 @@ let dash = {
 // Mouse
 document.addEventListener('mousemove', mousemoveEventListener);
 document.addEventListener('click', clickEventListener);
-let cursorX = 0, cursorY = 0;
+let mouseX = 0, mouseY = 0;
 let mouseover = {
     equipSword: false,
 }
 function mousemoveEventListener(e) {
-    [cursorX, cursorY] = [e.clientX, e.clientY];
+    [mouseX, mouseY] = [e.clientX, e.clientY];
 }
 function detectHover() {
     mouseover.equipSword = (mouseX > cnv.width*0.75-5+mapX && mouseX < cnv.width*0.75-5+mapX+110
@@ -91,7 +91,7 @@ function circle(x, y, r, type) {
     else ctx.fill();
 }
 
-console.log("mouse");
+console.log("mous");
 function draw() {
     now = Date.now();
     detectHover();
