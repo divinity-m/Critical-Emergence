@@ -48,7 +48,7 @@ function detectHover() {
 }
 function clickEventListener(e) {
     if (mouseover.equipSword) {
-        player.color = "#FF0000";
+        player.color = "#FF000090";
         player.subColor = "#E60000";
         player.img = document.getElementById("sword-icon2");
     }
@@ -161,7 +161,7 @@ function draw() {
     circle(player.x, player.y, player.r, "fill");
     circle(player.x, player.y, player.r, "stroke");
     let corner = player.r*Math.sin(45);
-    if (player.img != "none") ctx.drawImage(player.img, player.x-corner, player.y-corner, corner, corner);
+    if (player.img != "none") ctx.drawImage(player.img, player.x-17.5, player.y-16, 35, 35);
 
     // Border
     ctx.strokeStyle = "#000000";
