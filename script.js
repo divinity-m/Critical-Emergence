@@ -34,12 +34,13 @@ let dash = {
 // Mouse
 document.addEventListener('mousemove', mousemoveEventListener);
 document.addEventListener('click', clickEventListener);
-let mouseX = 0, mouseY = 0;
+let mouseX = 0, mouseY = 0, track;
 let mouseover = {
     equipSword: false,
 }
 function mousemoveEventListener(e) {
     [mouseX, mouseY] = [e.clientX, e.clientY];
+    if (track) console.log(`(${mouseX}, ${mouseY})`);
 }
 function detectHover() {
     mouseover.equipSword = (mouseX > cnv.width*0.75-5+mapX && mouseX < cnv.width*0.75-5+mapX+110
@@ -157,7 +158,7 @@ function draw() {
     // Player
     ctx.fillStyle = player.color;
     ctx.strokeStyle = player.subColor;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
     circle(player.x, player.y, player.r, "fill");
     circle(player.x, player.y, player.r, "stroke");
 
