@@ -123,7 +123,7 @@ function draw() {
     ctx.drawImage(document.getElementById("sword-icon"), cnv.width*3/4+mapX, cnv.height/2-50+mapY, 100, 100);
     ctx.strokeRect(cnv.width*3/4+mapX, cnv.height/2-50+mapY, 100, 100);
     let distSword = Math.hypot(player.x - (cnv.width*3/4+50+mapX), player.y - (cnv.height/2+mapY));
-    if (distSword < 100) {
+    if (distSword < 150) {
         ctx.lineWidth = 1.25;
         ctx.fillRect(cnv.width*3/4-5+mapX, cnv.height/2+60+mapY, 110, 20);
         ctx.strokeRect(cnv.width*3/4-5+mapX, cnv.height/2+60+mapY, 110, 20);
