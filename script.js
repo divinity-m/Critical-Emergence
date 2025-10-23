@@ -96,16 +96,11 @@ console.log("mou");
 function draw() {
     now = Date.now();
     detectHover();
+    
     // Background #RRGGBBAA
     ctx.fillStyle = "#C8C8C8";
     ctx.fillRect(0, 0, cnv.width, cnv.height);
-    // Border
-    ctx.strokeStyle = "#000000";
-    ctx.lineWidth = 10;
-    ctx.strokeRect(5, 5, cnv.width-10, cnv.height-10);
-    ctx.strokeStyle = "#FFFFFF";
-    ctx.lineWidth = 2.5;
-    ctx.strokeRect(5, 5, cnv.width-10, cnv.height-10);
+    
     // Movement
     keyboardMovement();
     if (player.x < 100) { player.x = Math.max(player.x, 100); mapX += player.speed; }
@@ -161,6 +156,14 @@ function draw() {
     ctx.lineWidth = 3;
     circle(player.x, player.y, player.r, "fill");
     circle(player.x, player.y, player.r, "stroke");
+
+    // Border
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 10;
+    ctx.strokeRect(5, 5, cnv.width-10, cnv.height-10);
+    ctx.strokeStyle = "#FFFFFF";
+    ctx.lineWidth = 2.5;
+    ctx.strokeRect(5, 5, cnv.width-10, cnv.height-10);
 
     // Animate
     requestAnimationFrame(draw);
