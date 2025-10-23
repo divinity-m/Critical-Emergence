@@ -9,7 +9,7 @@ window.addEventListener('resize', resizeCnv);
 
 // Variables
 let player = {
-    x: cnv.width*0.5, y: cnv.height*0.5, r: 15, speed: cnv.width/275, baseSpeed: cnv.width/275, color: "#FFFFFF", subColor: "#E6E6E6",
+    x: cnv.width*0.5, y: cnv.height*0.5, r: 15, speed: cnv.width/275, baseSpeed: cnv.width/275, color: "#FFFFFF", subColor: "#E6E6E6", img: "none",
 }
 let now = Date.now();
 let mapY = 0, mapX = 0;
@@ -47,7 +47,11 @@ function detectHover() {
     mouseover.equipSword = distSword < 150 && mouseX > 1150-5+mapX && mouseX < 1150-5+mapX+110 && mouseY > 432+60+mapY && mouseY < 432+60+mapY+20;
 }
 function clickEventListener(e) {
-    if (mouseover.equipSword) { player.color = "#FF0000"; player.subColor = "#E60000"};
+    if (mouseover.equipSword) {
+        player.color = "#FF0000";
+        player.subColor = "#E60000";
+        player.img = document.getElementById("sword-icon2");
+    }
 }
 
 // Controls
@@ -92,7 +96,7 @@ function circle(x, y, r, type) {
     else ctx.fill();
 }
 
-console.log("mou");
+console.log("sword 2");
 function draw() {
     now = Date.now();
     detectHover();
@@ -156,6 +160,8 @@ function draw() {
     ctx.lineWidth = 3;
     circle(player.x, player.y, player.r, "fill");
     circle(player.x, player.y, player.r, "stroke");
+    let corner = player.r*Math.sin(45);
+    if (player.img != "none") ctx.drawImage(player.img, player.x-corner, player.y-corner, corner, corner);
 
     // Border
     ctx.strokeStyle = "#000000";
