@@ -11,7 +11,7 @@ const GAME_WIDTH = window.screen.width, GAME_HEIGHT = window.screen.height; // t
 
 // Variables
 let player = {
-    x: GAME_WIDTH*0.5, y: GAME_HEIGHT*0.5, r: 15, speed: GAME_WIDTH/275, baseSpeed: GAME_WIDTH/275, color: "#FFFFFF", subColor: "#E6E6E6", img: "none",
+    x: GAME_WIDTH*0.5, y: GAME_HEIGHT*0.5, r: 15, speed: GAME_WIDTH/275, baseSpeed: GAME_WIDTH/275, color: "#FFFFFF", subColor: "#E6E6E6", img: "none", inBattle: false,
 }
 let now = Date.now();
 let mapY = 0, mapX = 0;
@@ -50,7 +50,7 @@ function detectHover() {
 }
 function clickEventListener(e) {
     if (mouseover.equipSword) {
-        player.color = "#FF000090";
+        player.color = "#FF0000CC";
         player.subColor = "#E60000";
         player.img = document.getElementById("sword-icon2");
     }
@@ -125,7 +125,7 @@ function makeSlime() {
     while (!validPosition) {
         validPosition = true;
         for (let i = 0; i < distances.length; i++) {
-            if (distances[i] < GAME_WIDTH*0.25) {
+            if (distances[i] < GAME_WIDTH*0.5) {
                 validPosition = false;
                 slime.x = Math.random() * GAME_WIDTH*2 - GAME_WIDTH/2 + mapX;
                 slime.y = Math.random() * GAME_HEIGHT*2 - GAME_HEIGHT/2 + mapY;
@@ -139,17 +139,19 @@ function makeSlime() {
 }
 for (let i = 0; i < 5; i++) slimes.push(makeSlime());
 
-let encounterColor = "FF000000";
+let encounterColor = "#FF000000";
+let loopingEncounterColor = false;
+let encNext = 1;
 function loopEncounterColor() {
-    if (encounterColor === "FF000000") encounterColor = "FF000033";
-    if (encounterColor === "FF000033") encounterColor = "FF000066";
-    if (encounterColor === "FF000066") encounterColor = "FF000099";
-    if (encounterColor === "FF000099") encounterColor = "FF0000CC";
-    if (encounterColor === "FF0000CC") encounterColor = "FF0000FF";
-    if (encounterColor === "FF0000FF") encounterColor = "FF000000";
+    let encounterColors = ["#FF000000", "#FF000033", "#FF000066", "#FF000099", "#FF0000CC", "#FF0000FF"];
+    for (let i = 0; i < encounterColors.length; i++) {
+        if (encounterColor === encounterColors[i]) encounterColor = encounterColors[i+encNext];
+        if (encounterColor === "#FF0000FF") encNext *= -1;
+        if (encounterColor === "#FF000000") { encNext *= -1; loopingEncounterColor = false;}
+    }
 }
 
-console.log("encounter color");
+console.log("encounter trapping");
 function draw() {
     now = Date.now();
     detectHover();
@@ -161,15 +163,25 @@ function draw() {
     ctx.fillStyle = "#999999";
     ctx.font = "10px Verdana";
     ctx.textAlign = "left";
-    ctx.fillText(`Map XY: ${Math.round(mapX)}, ${Math.round(mapY)}`, 15, 30);
+    ctx.fillText(`Map XY: ${Math.round(-mapX)}, ${Math.round(-mapY)}`, 15, 30);
     ctx.fillText(`Player XY: ${Math.round(player.x - mapX)}, ${Math.round(player.y - mapY)}`, 15, 50);
     
     // Movement
     keyboardMovement();
-    if (player.x < 100) { player.x = Math.max(player.x, 100); mapX += player.speed; }
-    if (player.x > GAME_WIDTH-100) { player.x = Math.min(player.x, GAME_WIDTH-100); mapX -= player.speed; }
-    if (player.y < 100) { player.y = Math.max(player.y, 100); mapY += player.speed; }
-    if (player.y > GAME_HEIGHT-100) { player.y = Math.min(player.y, GAME_HEIGHT-100); mapY -= player.speed; }
+    let mapLimit = 200;
+    if (player.x < mapLimit) { player.x = Math.max(player.x, mapLimit); mapX += player.speed; }
+    if (player.x > GAME_WIDTH-mapLimit) { player.x = Math.min(player.x, GAME_WIDTH-mapLimit); mapX -= player.speed; }
+    if (player.y < mapLimit) { player.y = Math.max(player.y, mapLimit); mapY += player.speed; }
+    if (player.y > GAME_HEIGHT-mapLimit) { player.y = Math.min(player.y, GAME_HEIGHT-mapLimit); mapY -= player.speed; }
+    if (player.inBattle) {
+        let angleToCenter = Math.atan2(player.y - GAME_HEIGHT, player.x - GAME_WIDTH);
+        let distToCenter = Math.hypot(player.x - GAME_WIDTH, player.y - GAME_HEIGHT);
+
+        if (distToCenter > GAME_WIDTH*0.3) {
+            player.x = GAME_WIDTH*0.3 * Math.cos(angleToCenter);
+            player.y = GAME_WIDTH*0.3 * Math.sin(angleToCenter);
+        }
+    }
 
     // Dashing
     if (dash.activated) dash.use();
@@ -220,18 +232,33 @@ function draw() {
         if (now-slime.nextSprite > 200) { slime.index++; slime.nextSprite = Date.now(); }
         if (slime.index > 7) slime.index = 0;
         ctx.strokeStyle = "#00FF00";
-        circle(slime.x+35+mapX, slime.y+35+mapY, 100-player.r-1.5, "stroke");
+        if (!slime.encountered) circle(slime.x+35+mapX, slime.y+35+mapY, GAME_WIDTH*0.0652-player.r-1.5, "stroke");
     
         // Encountering
         let distSlime = Math.hypot(player.x - (slime.x+35+mapX), player.y - (slime.y+35+mapY));
-        if (distSlime < 100 || (slime.encountered && encounterColor != "FF000000")) {
+        if (distSlime < GAME_WIDTH*0.0652 && !player.inBattle) {
             slime.encountered = true;
-            ctx.fillStyle = encounterColor;
-            loopEncounterColor();
-            ctx.fillRect(slime.x+32.5+mapX, slime.y-25+mapY, 5, 20);
-            circle(slime.x+35+mapX, slime.y+5+mapY, 2.75);
+            loopingEncounterColor = true;
+            player.inBattle = true;
+            let addx = GAME_WIDTH/2 - (slime.x+35+mapX);
+            let addy = GAME_HEIGHT/2 - (slime.y+35+mapY);
+            mapX += addx;
+            mapY += addy;
+            player.x += addx;
+            player.y += addy;
+        }
+        if (slime.encountered) {
+            ctx.strokeStyle = "#00FF00";
+            circle(slime.x+35+mapX, slime.y+35+mapY, GAME_WIDTH*0.3, "stroke");
+            if (loopingEncounterColor) {
+                ctx.fillStyle = encounterColor;
+                ctx.fillRect(slime.x+32.5+mapX, slime.y-25+mapY, 5, 20);
+                circle(slime.x+35+mapX, slime.y+5+mapY, 2.75);
+            }
         }
     }
+
+    if (loopingEncounterColor) loopEncounterColor();
 
     // Player
     ctx.fillStyle = player.color;
