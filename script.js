@@ -145,17 +145,17 @@ let encColorCD = 0;
 let nextEncColor = 1;
 function loopEncounterColor() {
     let encounterColors = ["#FF000000", "#FF000033", "#FF000066", "#FF000099", "#FF0000CC", "#FF0000FF"];
-    if (now - nextEncColor > 0.1) {
+    if (now - encColorCD > 0.1) {
         for (let i = 0; i < encounterColors.length; i++) {
             if (encounterColor === encounterColors[i]) encounterColor = encounterColors[i+nextEncColor];
             if (encounterColor === "#FF0000FF") nextEncColor *= -1;
             if (encounterColor === "#FF000000") { nextEncColor *= -1; loopingEncounterColor = false;}
         }
-        nextEncColor = Date.now();
+        encColorCD = Date.now();
     }
 }
 
-console.log("encounter trapping 2, enc color");
+console.log("fixed trapping and enc color");
 function draw() {
     now = Date.now();
     detectHover();
@@ -184,15 +184,9 @@ function draw() {
         let angleToCenter = Math.atan2(player.y - GAME_HEIGHT/2, player.x - GAME_WIDTH/2);
         let distToCenter = Math.hypot(player.x - GAME_WIDTH/2, player.y - GAME_HEIGHT/2);
         
-        ctx.fillStyle = player.color;
-        ctx.strokeStyle = player.subColor;
-        ctx.lineWidth = 3;
-        circle(GAME_HEIGHT*0.48 * Math.cos(angleToCenter) + GAME_WIDTH/2 , GAME_HEIGHT*0.48 * Math.sin(angleToCenter) + GAME_HEIGHT/2 , player.r);
-        circle(GAME_HEIGHT*0.48 * Math.cos(angleToCenter) + GAME_WIDTH/2 , GAME_HEIGHT*0.48 * Math.sin(angleToCenter) + GAME_HEIGHT/2 , player.r, "stroke");
-        
-        if (distToCenter+player.r+1.5 > GAME_HEIGHT*0.48) {
-            player.x = GAME_HEIGHT*0.48 * Math.cos(angleToCenter) + GAME_WIDTH/2 + player.r + 1.5;
-            player.y = GAME_HEIGHT*0.48 * Math.sin(angleToCenter) + GAME_HEIGHT/2 + player.r + 1.5;
+        if (distToCenter+player.r+1.5+1.375 > GAME_HEIGHT*0.48) {
+            player.x = GAME_HEIGHT*0.48 * Math.cos(angleToCenter) + GAME_WIDTH/2 - (player.r+1.5+1.375) * Math.cos(angleToCenter);
+            player.y = GAME_HEIGHT*0.48 * Math.sin(angleToCenter) + GAME_HEIGHT/2 - (player.r+1.5+1.375) * Math.sin(angleToCenter);
         }
     }
 
@@ -253,7 +247,7 @@ function draw() {
             player.inBattle = true;
             slime.encountered = true;
             loopingEncounterColor = true;
-            nextEncColor = Date.now();
+            encColorCD = Date.now();
             let addx = GAME_WIDTH/2 - (slime.x+35+mapX);
             let addy = GAME_HEIGHT/2 - (slime.y+35+mapY);
             mapX += addx;
