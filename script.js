@@ -40,7 +40,11 @@ let mouseover = { equipSword: false, }
 document.addEventListener('mousemove', mousemoveEventListener);
 document.addEventListener('click', clickEventListener);
 document.addEventListener("auxclick", (e) => {
-    if (e.button === 1) { e.preventDefault(); mouseMovementOn = true; }
+    if (e.button === 1) {
+        e.preventDefault();
+        if (mouseMovementOn) mouseMovementOn = false;
+        else mouseMovementOn = true;
+    }
 });
 
 function mousemoveEventListener(e) {
@@ -60,10 +64,9 @@ function clickEventListener(e) {
 }
 function mouseMovement() {
     if (!kbMovementOn && mouseMovementOn) {
-        let dx = player.x - mouseX, dy = player.y - mouseY;
+        let dx = mouseX - player.x, dy = mouseY - player.y;
         let dist = Math.hypot(dx, dy);
-        let clamp = Math.min(75, dist) / 75;
-        let slowFactor = 0.5 + 0.5 * clamp;
+        let slowFactor = Math.sqrt(Math.min(100, dist)) / 10;
         player.speed = player.baseSpeed * shiftPressed * slowFactor;
         if (dist > 0.25) {
             player.x += dx/dist * player.speed;
@@ -176,7 +179,7 @@ function loopEncounterColor() {
     }
 }
 
-console.log("mouse movement");
+console.log("mouse movement but even better");
 function draw() {
     now = Date.now();
     detectHover();
@@ -197,12 +200,10 @@ function draw() {
     let mapLimit;
     if (player.inBattle) mapLimit = 0;
     else mapLimit = 150;
-    player.x = Math.min(Math.max(player.x, mapLimit), GAME_WIDTH-mapLimit);
-    player.y = Math.min(Math.max(player.y, mapLimit), GAME_HEIGHT-mapLimit);
     
     let dx = 1, dy = 1, dist = 1;
     if (mouseMovementOn && !kbMovementOn) {
-        let dx = Math.abs(player.x - mouseX), dy = Math.abs(player.y - mouseY);
+        let dx = Math.abs(mouseX - player.x), dy = Math.abs(mouseY - player.y);
         let dist = Math.hypot(dx, dy);
     }
     
@@ -210,6 +211,9 @@ function draw() {
     if (player.x > GAME_WIDTH-mapLimit) mapX -= player.speed * (dx/dist);
     if (player.y < mapLimit) mapY += player.speed * (dy/dist);
     if (player.y > GAME_HEIGHT-mapLimit) mapY -= player.speed * (dy/dist);
+    
+    player.x = Math.min(Math.max(player.x, mapLimit), GAME_WIDTH-mapLimit);
+    player.y = Math.min(Math.max(player.y, mapLimit), GAME_HEIGHT-mapLimit);
 
     if (player.inBattle) {
         let angleToCenter = Math.atan2(player.y - GAME_HEIGHT/2, player.x - GAME_WIDTH/2);
