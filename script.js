@@ -187,8 +187,8 @@ function draw() {
         ctx.fillStyle = player.color;
         ctx.strokeStyle = player.subColor;
         ctx.lineWidth = 3;
-        circle(GAME_HEIGHT*0.48 * Math.cos(angleToCenter) + GAME_WIDTH/2 + player.r, GAME_HEIGHT*0.48 * Math.sin(angleToCenter) + GAME_HEIGHT/2 + player.r, player.r);
-        circle(GAME_HEIGHT*0.48 * Math.cos(angleToCenter) + GAME_WIDTH/2 + player.r, GAME_HEIGHT*0.48 * Math.sin(angleToCenter) + GAME_HEIGHT/2 + player.r, player.r, "stroke");
+        circle(GAME_HEIGHT*0.48 * Math.cos(angleToCenter) + GAME_WIDTH/2 , GAME_HEIGHT*0.48 * Math.sin(angleToCenter) + GAME_HEIGHT/2 , player.r);
+        circle(GAME_HEIGHT*0.48 * Math.cos(angleToCenter) + GAME_WIDTH/2 , GAME_HEIGHT*0.48 * Math.sin(angleToCenter) + GAME_HEIGHT/2 , player.r, "stroke");
         
         if (distToCenter+player.r+1.5 > GAME_HEIGHT*0.48) {
             player.x = GAME_HEIGHT*0.48 * Math.cos(angleToCenter) + GAME_WIDTH/2 + player.r + 1.5;
