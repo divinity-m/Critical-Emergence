@@ -34,12 +34,15 @@ let dash = {
 };
 
 // Mouse
+let mouseX = 0, mouseY = 0, mouseMovementOn = false, track;
+let mouseover = { equipSword: false, }
+
 document.addEventListener('mousemove', mousemoveEventListener);
 document.addEventListener('click', clickEventListener);
-let mouseX = 0, mouseY = 0, track;
-let mouseover = {
-    equipSword: false,
-}
+document.addEventListener("auxclick", (e) => {
+    if (e.button === 1) { e.preventDefault(); mouseMovementOn = true; }
+});
+
 function mousemoveEventListener(e) {
     [mouseX, mouseY] = [e.clientX, e.clientY];
     if (track) console.log(`(${mouseX}, ${mouseY})`);
@@ -55,16 +58,30 @@ function clickEventListener(e) {
         player.img = document.getElementById("sword-icon2");
     }
 }
+function mouseMovement() {
+    if (!kbMovementOn && mouseMovementOn) {
+        let dx = player.x - mouseX, dy = player.y - mouseY;
+        let dist = Math.hypot(dx, dy);
+        let clamp = Math.min(75, dist) / 75;
+        let slowFactor = 0.5 + 0.5 * clamp;
+        player.speed = player.baseSpeed * shiftPressed * slowFactor;
+        if (dist > 0.25) {
+            player.x += dx/dist * player.speed;
+            player.y += dy/dist * player.speed;
+        }
+    }
+}
 
-// Controls
+// Keyboard
 document.addEventListener('keydown', keydownEventListener);
 document.addEventListener('keyup', keyupEventListener);
-let moveUp = false, moveDown = false, moveLeft = false, moveRight = false;
+let moveUp = false, moveDown = false, moveLeft = false, moveRight = false, kbMovementOn = false, shiftPressed = 1;
 function keydownEventListener(e) {
     if (e.code === "KeyW" || e.code === "ArrowUp") moveUp = true;
     if (e.code === "KeyA" || e.code === "ArrowLeft") moveLeft = true;
     if (e.code === "KeyS" || e.code === "ArrowDown") moveDown = true;
     if (e.code === "KeyD" || e.code === "ArrowRight") moveRight = true;
+    if (e.code === "ShiftLeft" || e.code === "ShiftRight") shiftPressed = 0.5;
     if (e.code === "KeyQ" && now - dash.lastEnded > 1500) dash.activated = true;
 }
 function keyupEventListener(e) {
@@ -72,6 +89,7 @@ function keyupEventListener(e) {
     if (e.code === "KeyA" || e.code === "ArrowLeft") moveLeft = false;
     if (e.code === "KeyS" || e.code === "ArrowDown") moveDown = false;
     if (e.code === "KeyD" || e.code === "ArrowRight") moveRight = false;
+    if (e.code === "ShiftLeft" || e.code === "ShiftRight") shiftPressed = 1;
 }
 function keyboardMovement() {
     let xKb = 0; yKb = 0;
@@ -85,7 +103,10 @@ function keyboardMovement() {
         xKb *= Math.SQRT1_2;
         yKb *= Math.SQRT1_2;
     }
+    if (xKb === 0 && yKb === 0) kbMovementOn = false;
+    else kbMovementOn = true;
 
+    player.speed = player.baseSpeed * shiftPressed;
     player.x += xKb * player.speed;
     player.y += yKb * player.speed;
 }
@@ -155,7 +176,7 @@ function loopEncounterColor() {
     }
 }
 
-console.log("250ms encColorCD");
+console.log("mouse movement");
 function draw() {
     now = Date.now();
     detectHover();
@@ -172,14 +193,24 @@ function draw() {
     
     // Movement
     keyboardMovement();
+    mouseMovement();
     let mapLimit;
     if (player.inBattle) mapLimit = 0;
-    else mapLimit = 200;
-        
-    if (player.x < mapLimit) { player.x = Math.max(player.x, mapLimit); mapX += player.speed; }
-    if (player.x > GAME_WIDTH-mapLimit) { player.x = Math.min(player.x, GAME_WIDTH-mapLimit); mapX -= player.speed; }
-    if (player.y < mapLimit) { player.y = Math.max(player.y, mapLimit); mapY += player.speed; }
-    if (player.y > GAME_HEIGHT-mapLimit) { player.y = Math.min(player.y, GAME_HEIGHT-mapLimit); mapY -= player.speed; }
+    else mapLimit = 150;
+    player.x = Math.min(Math.max(player.x, mapLimit), GAME_WIDTH-mapLimit);
+    player.y = Math.min(Math.max(player.y, mapLimit), GAME_HEIGHT-mapLimit);
+    
+    let dx = 1, dy = 1, dist = 1;
+    if (mouseMovementOn && !kbMovementOn) {
+        let dx = Math.abs(player.x - mouseX), dy = Math.abs(player.y - mouseY);
+        let dist = Math.hypot(dx, dy);
+    }
+    
+    if (player.x < mapLimit) mapX += player.speed * (dx/dist);
+    if (player.x > GAME_WIDTH-mapLimit) mapX -= player.speed * (dx/dist);
+    if (player.y < mapLimit) mapY += player.speed * (dy/dist);
+    if (player.y > GAME_HEIGHT-mapLimit) mapY -= player.speed * (dy/dist);
+
     if (player.inBattle) {
         let angleToCenter = Math.atan2(player.y - GAME_HEIGHT/2, player.x - GAME_WIDTH/2);
         let distToCenter = Math.hypot(player.x - GAME_WIDTH/2, player.y - GAME_HEIGHT/2);
