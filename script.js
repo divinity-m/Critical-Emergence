@@ -201,14 +201,14 @@ function draw() {
         if (now-slime.nextSprite > 200) { slime.index++; slime.nextSprite = Date.now(); }
         if (slime.index > 7) slime.index = 0;
         ctx.strokeStyle = "#00FF00";
-        circle(slime.x+35, slime.y+35, 100-player.r-1.5, "stroke");
+        circle(slime.x+35+mapX, slime.y+35+mapY, 100-player.r-1.5, "stroke");
     
         // Encountering
-        let distSlime = Math.hypot(player.x - 235+mapX, player.y - 235+mapY);
+        let distSlime = Math.hypot(player.x - slime.x+35+mapX, player.y - slime.y+35+mapY);
         if (distSlime < 100) {
             slime.encountered = true;
-            ctx.drawRect(slime.x+25, slime.y-120, 20, 80);
-            circle(slime.x+35, slime.y-20, 10);
+            ctx.drawRect(slime.x+25+mapX, slime.y-120+mapY, 20, 80);
+            circle(slime.x+35+mapX, slime.y-20+mapY, 10);
         }
     }
 
