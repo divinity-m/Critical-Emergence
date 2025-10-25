@@ -145,7 +145,7 @@ let encColorCD = 0;
 let nextEncColor = 1;
 function loopEncounterColor() {
     let encounterColors = ["#FF000000", "#FF000033", "#FF000066", "#FF000099", "#FF0000CC", "#FF0000FF"];
-    if (now - encColorCD > 0.1) {
+    if (now - encColorCD > 250) {
         for (let i = 0; i < encounterColors.length; i++) {
             if (encounterColor === encounterColors[i]) encounterColor = encounterColors[i+nextEncColor];
             if (encounterColor === "#FF0000FF") nextEncColor *= -1;
@@ -155,7 +155,7 @@ function loopEncounterColor() {
     }
 }
 
-console.log("fixed trapping and enc color");
+console.log("250ms encColorCD");
 function draw() {
     now = Date.now();
     detectHover();
