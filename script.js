@@ -30,6 +30,7 @@ let dash = {
         }
     }
 };
+let slimeIndex = 0;
 
 // Mouse
 document.addEventListener('mousemove', mousemoveEventListener);
@@ -96,7 +97,7 @@ function circle(x, y, r, type) {
     else ctx.fill();
 }
 
-console.log("sword 2");
+console.log("slime");
 function draw() {
     now = Date.now();
     detectHover();
@@ -153,6 +154,11 @@ function draw() {
         ctx.font = "bold 15px Verdana";
         ctx.fillText("Equip Sword", 1150+50+mapX, 432+75+mapY);
     }
+
+    // Slime (Sprite Sheet Dimensions: Width - 800 | Height - 100)
+    ctx.drawImage(document.getElementById("slime-png"), 30 + 100 * slimeIndex, 25, 100, 50, 200, 200, 250, 125);
+    slimeIndex++;
+    if (slimeIndex > 7) slimeIndex = 0;
 
     // Player
     ctx.fillStyle = player.color;
