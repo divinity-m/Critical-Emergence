@@ -31,6 +31,7 @@ let dash = {
     }
 };
 let slimeIndex = 0;
+let nextSlimeSprite = Date.now();
 
 // Mouse
 document.addEventListener('mousemove', mousemoveEventListener);
@@ -97,7 +98,7 @@ function circle(x, y, r, type) {
     else ctx.fill();
 }
 
-console.log("slime");
+console.log("nextSlimeSprite");
 function draw() {
     now = Date.now();
     detectHover();
@@ -157,7 +158,7 @@ function draw() {
 
     // Slime (Sprite Sheet Dimensions: Width - 800 | Height - 100)
     ctx.drawImage(document.getElementById("slime-png"), 30 + 100 * slimeIndex, 25, 100, 50, 200, 200, 250, 125);
-    slimeIndex++;
+    if (now-nextSlimeSprite > 250) { slimeIndex++; nextSlimeSprite = Date.now(); }
     if (slimeIndex > 7) slimeIndex = 0;
 
     // Player
