@@ -3,13 +3,15 @@ const cnv = document.getElementById('canvas');
 const ctx = cnv.getContext('2d');
 
 // Resizing the canvas
+// My window dimensions are 1536 by 864
 function resizeCnv() { cnv.width = window.innerWidth; cnv.height = window.innerHeight; }
 resizeCnv();
-window.addEventListener('resize', resizeCnv);
+window.addEventListener('resize', resizeCnv);    
+const GAME_WIDTH = window.screen.width, GAME_HEIGHT = window.screen.height; // to prevent bugs due to zooming
 
 // Variables
 let player = {
-    x: cnv.width*0.5, y: cnv.height*0.5, r: 15, speed: cnv.width/275, baseSpeed: cnv.width/275, color: "#FFFFFF", subColor: "#E6E6E6", img: "none",
+    x: GAME_WIDTH*0.5, y: GAME_HEIGHT*0.5, r: 15, speed: GAME_WIDTH/275, baseSpeed: GAME_WIDTH/275, color: "#FFFFFF", subColor: "#E6E6E6", img: "none",
 }
 let now = Date.now();
 let mapY = 0, mapX = 0;
@@ -30,8 +32,6 @@ let dash = {
         }
     }
 };
-let slimeIndex = 0;
-let nextSlimeSprite = Date.now();
 
 // Mouse
 document.addEventListener('mousemove', mousemoveEventListener);
@@ -45,8 +45,8 @@ function mousemoveEventListener(e) {
     if (track) console.log(`(${mouseX}, ${mouseY})`);
 }
 function detectHover() {
-    let distSword = Math.hypot(player.x - (1150+50+mapX), player.y - (432+mapY));
-    mouseover.equipSword = distSword < 150 && mouseX > 1150-5+mapX && mouseX < 1150-5+mapX+110 && mouseY > 432+60+mapY && mouseY < 432+60+mapY+20;
+    let distSword = Math.hypot(player.x - (1150+50+mapX), player.y - (GAME_HEIGHT/2+mapY));
+    mouseover.equipSword = distSword < 150 && mouseX > 1150-5+mapX && mouseX < 1150-5+mapX+110 && mouseY > GAME_HEIGHT/2+60+mapY && mouseY < GAME_HEIGHT/2+60+mapY+20;
 }
 function clickEventListener(e) {
     if (mouseover.equipSword) {
@@ -97,8 +97,41 @@ function circle(x, y, r, type) {
     if (type === "stroke") ctx.stroke();
     else ctx.fill();
 }
+let slimes = [];
+function makeSlime() {
+    let slime = { // width and height are 70
+        x: Math.random() * GAME_WIDTH*2 - GAME_WIDTH/2,
+        y: Math.random() * GAME_HEIGHT*2 - GAME_HEIGHT/2,
+        img: document.getElementById("slime-png"),
+        index: 0,
+        encountered: false,
+        defeated: false,
+    }
+    
+    let distSlime = Math.hypot(player.x-slime.x+35, player.y-slime.y+35);
+    let allDistances = [distSlime];
+    for (let createdSlime of slimes) {
+        allDistances.push(Math.hypot(slime.x-createdSlime.x, slime.y-createdSlime.y));
+    }
+    
+    let validPosition = false;
+    while (!validPosition) {
+        validPosition = true;
+        for (let i = 0; i < allDistances.length; i++) {
+            if (allDistances[i] < 400) {
+                validPosition = false;
+                slime.x = Math.random() * GAME_WIDTH*2 - GAME_WIDTH/2;
+                slime.y = Math.random() * GAME_HEIGHT*2 - GAME_HEIGHT/2;
+                break;
+            }
+        }
+    }
+    slime.nextSprite = Date.now();
+    return slime;
+}
+for (let i = 0; i < 5; i++) slimes.push(makeSlime());
 
-console.log("200ms per sprite and shadow redesign");
+console.log("slime array and screen dimensions");
 function draw() {
     now = Date.now();
     detectHover();
@@ -110,9 +143,9 @@ function draw() {
     // Movement
     keyboardMovement();
     if (player.x < 100) { player.x = Math.max(player.x, 100); mapX += player.speed; }
-    if (player.x > cnv.width-100) { player.x = Math.min(player.x, cnv.width-100); mapX -= player.speed; }
+    if (player.x > GAME_WIDTH-100) { player.x = Math.min(player.x, GAME_WIDTH-100); mapX -= player.speed; }
     if (player.y < 100) { player.y = Math.max(player.y, 100); mapY += player.speed; }
-    if (player.y > cnv.height-100) { player.y = Math.min(player.y, cnv.height-100); mapY -= player.speed; }
+    if (player.y > GAME_HEIGHT-100) { player.y = Math.min(player.y, GAME_HEIGHT-100); mapY -= player.speed; }
 
     // Dashing
     if (dash.activated) dash.use();
@@ -140,26 +173,39 @@ function draw() {
     ctx.fillStyle = "#FF000050";
     ctx.strokeStyle = "#FF0000";
     ctx.lineWidth = 2.5;
-    ctx.fillRect(1150+mapX, 432-50+mapY, 100, 100); // 432 is cnv.height/2 for me
-    ctx.drawImage(document.getElementById("sword-icon"), 1150+mapX, 432-50+mapY, 100, 100);
-    ctx.strokeRect(1150+mapX, 432-50+mapY, 100, 100);
-    let distSword = Math.hypot(player.x - (1150+50+mapX), player.y - (432+mapY));
+    ctx.fillRect(1150+mapX, GAME_HEIGHT/2-50+mapY, 100, 100);
+    ctx.drawImage(document.getElementById("sword-icon"), 1150+mapX, GAME_HEIGHT/2-50+mapY, 100, 100);
+    ctx.strokeRect(1150+mapX, GAME_HEIGHT/2-50+mapY, 100, 100);
+    let distSword = Math.hypot(player.x - (1150+50+mapX), player.y - (GAME_HEIGHT/2+mapY));
     if (distSword < 150) {
         ctx.lineWidth = 1.25;
         if (mouseover.equipSword) ctx.fillStyle = "#FF000025";
-        ctx.fillRect(1150-5+mapX, 432+60+mapY, 110, 20);
-        ctx.strokeRect(1150-5+mapX, 432+60+mapY, 110, 20);
+        ctx.fillRect(1150-5+mapX, GAME_HEIGHT/2+60+mapY, 110, 20);
+        ctx.strokeRect(1150-5+mapX, GAME_HEIGHT/2+60+mapY, 110, 20);
         
         ctx.fillStyle = "#FF0000";
         ctx.textAlign = "center";
         ctx.font = "bold 15px Verdana";
-        ctx.fillText("Equip Sword", 1150+50+mapX, 432+75+mapY);
+        ctx.fillText("Equip Sword", 1150+50+mapX, GAME_HEIGHT/2+75+mapY);
     }
 
     // Slime (Sprite Sheet Dimensions: Width - 800 | Height - 100)
-    ctx.drawImage(document.getElementById("slime-png"), 30 + 100 * slimeIndex, 25, 100, 50, 200, 200, 250, 125);
-    if (now-nextSlimeSprite > 200) { slimeIndex++; nextSlimeSprite = Date.now(); }
-    if (slimeIndex > 7) slimeIndex = 0;
+    for (let slime of slimes) {
+        // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+        ctx.drawImage(slime.img, 35 + 100 * slime.index, 35, 30, 30, slime.x+mapX, slime.y+mapY, 70, 70);
+        if (now-slime.nextSprite > 200) { slime.index++; slime.nextSprite = Date.now(); }
+        if (slime.index > 7) slime.index = 0;
+        ctx.strokeStyle = "#00FF00";
+        circle(slime.x+35, slime.y+35, 100-player.r-1.5, "stroke");
+    
+        // Encountering
+        let distSlime = Math.hypot(player.x - 235+mapX, player.y - 235+mapY);
+        if (distSlime < 100) {
+            slime.encountered = true;
+            ctx.drawRect(slime.x+25, slime.y-120, 20, 80);
+            circle(slime.x+35, slime.y-20, 10);
+        }
+    }
 
     // Player
     ctx.fillStyle = player.color;
