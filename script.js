@@ -107,21 +107,26 @@ function makeSlime() {
         encountered: false,
         defeated: false,
     }
-    
-    let distSlime = Math.hypot(player.x-slime.x+35, player.y-slime.y+35);
-    let allDistances = [distSlime];
-    for (let createdSlime of slimes) {
-        allDistances.push(Math.hypot(slime.x-createdSlime.x, slime.y-createdSlime.y));
+
+    function checkSlimeDistances() {
+        let distSlime = Math.hypot(player.x-slime.x+35, player.y-slime.y+35);
+        let slimeDistances = [distSlime];
+        for (let createdSlime of slimes) {
+            slimeDistances.push(Math.hypot(slime.x-createdSlime.x, slime.y-createdSlime.y));
+        }
+        return slimeDistances;
     }
+    let distances = checkSlimeDistances();
     
     let validPosition = false;
     while (!validPosition) {
         validPosition = true;
-        for (let i = 0; i < allDistances.length; i++) {
-            if (allDistances[i] < 400) {
+        for (let i = 0; i < distances.length; i++) {
+            if (distances[i] < GAME_WIDTH*0.25) {
                 validPosition = false;
                 slime.x = Math.random() * GAME_WIDTH*2 - GAME_WIDTH/2;
                 slime.y = Math.random() * GAME_HEIGHT*2 - GAME_HEIGHT/2;
+                distances = checkSlimeDistances();
                 break;
             }
         }
