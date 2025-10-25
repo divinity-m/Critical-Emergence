@@ -97,6 +97,8 @@ function circle(x, y, r, type) {
     if (type === "stroke") ctx.stroke();
     else ctx.fill();
 }
+
+// Game related functions
 let slimes = [];
 function makeSlime() {
     let slime = { // width and height are 70
@@ -137,7 +139,17 @@ function makeSlime() {
 }
 for (let i = 0; i < 5; i++) slimes.push(makeSlime());
 
-console.log("slimes dont spawn next to the sword statue and other slime bugs");
+let encounterColor = "FF000000";
+function loopEncounterColor() {
+    if (encounterColor === "FF000000") encounterColor = "FF000033";
+    if (encounterColor === "FF000033") encounterColor = "FF000066";
+    if (encounterColor === "FF000066") encounterColor = "FF000099";
+    if (encounterColor === "FF000099") encounterColor = "FF0000CC";
+    if (encounterColor === "FF0000CC") encounterColor = "FF0000FF";
+    if (encounterColor === "FF0000FF") encounterColor = "FF000000";
+}
+
+console.log("encounter color");
 function draw() {
     now = Date.now();
     detectHover();
@@ -145,6 +157,12 @@ function draw() {
     // Background #RRGGBBAA
     ctx.fillStyle = "#C8C8C8";
     ctx.fillRect(0, 0, cnv.width, cnv.height);
+
+    ctx.fillStyle = "#999999";
+    ctx.font = "10px Verdana";
+    ctx.textAlign = "left";
+    ctx.fillText(`Map XY: ${Math.round(mapX)}, ${Math.round(mapY)}`, 15, 30);
+    ctx.fillText(`Player XY: ${Math.round(player.x - mapX)}, ${Math.round(player.y - mapY)}`, 15, 50);
     
     // Movement
     keyboardMovement();
@@ -198,18 +216,20 @@ function draw() {
     // Slime (Sprite Sheet Dimensions: Width - 800 | Height - 100)
     for (let slime of slimes) {
         // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
-        ctx.drawImage(slime.img, 35 + 100 * slime.index, 35, 30, 30, slime.x+mapX, slime.y+mapY, 70, 70);
+        ctx.drawImage(slime.img, 34.5 + 100 * slime.index, 35, 30, 30, slime.x+mapX, slime.y+mapY, 70, 70);
         if (now-slime.nextSprite > 200) { slime.index++; slime.nextSprite = Date.now(); }
         if (slime.index > 7) slime.index = 0;
         ctx.strokeStyle = "#00FF00";
         circle(slime.x+35+mapX, slime.y+35+mapY, 100-player.r-1.5, "stroke");
     
         // Encountering
-        let distSlime = Math.hypot(player.x - slime.x+35+mapX, player.y - slime.y+35+mapY);
-        if (distSlime < 100) {
+        let distSlime = Math.hypot(player.x - (slime.x+35+mapX), player.y - (slime.y+35+mapY));
+        if (distSlime < 100 || (slime.encountered && encounterColor != "FF000000")) {
             slime.encountered = true;
-            ctx.drawRect(slime.x+25+mapX, slime.y-120+mapY, 20, 80);
-            circle(slime.x+35+mapX, slime.y-20+mapY, 10);
+            ctx.fillStyle = encounterColor;
+            loopEncounterColor();
+            ctx.fillRect(slime.x+32.5+mapX, slime.y-25+mapY, 5, 20);
+            circle(slime.x+35+mapX, slime.y+5+mapY, 2.75);
         }
     }
 
