@@ -151,7 +151,7 @@ function loopEncounterColor() {
     }
 }
 
-console.log("encounter trapping");
+console.log("encounter trapping 2");
 function draw() {
     now = Date.now();
     detectHover();
@@ -168,18 +168,24 @@ function draw() {
     
     // Movement
     keyboardMovement();
-    let mapLimit = 200;
+    let mapLimit;
+    if (player.inBattle) mapLimit = 0;
+    else mapLimit = 200;
+        
     if (player.x < mapLimit) { player.x = Math.max(player.x, mapLimit); mapX += player.speed; }
     if (player.x > GAME_WIDTH-mapLimit) { player.x = Math.min(player.x, GAME_WIDTH-mapLimit); mapX -= player.speed; }
     if (player.y < mapLimit) { player.y = Math.max(player.y, mapLimit); mapY += player.speed; }
     if (player.y > GAME_HEIGHT-mapLimit) { player.y = Math.min(player.y, GAME_HEIGHT-mapLimit); mapY -= player.speed; }
     if (player.inBattle) {
-        let angleToCenter = Math.atan2(player.y - GAME_HEIGHT, player.x - GAME_WIDTH);
-        let distToCenter = Math.hypot(player.x - GAME_WIDTH, player.y - GAME_HEIGHT);
-
-        if (distToCenter > GAME_WIDTH*0.3) {
-            player.x = GAME_WIDTH*0.3 * Math.cos(angleToCenter);
-            player.y = GAME_WIDTH*0.3 * Math.sin(angleToCenter);
+        let angleToCenter = Math.atan2(player.y - GAME_HEIGHT/2, player.x - GAME_WIDTH/2);
+        let distToCenter = Math.hypot(player.x - GAME_WIDTH/2, player.y - GAME_HEIGHT/2);
+        
+        ctx.fillStyle = "white";
+        circle(GAME_HEIGHT*0.48 * Math.cos(angleToCenter) + GAME_WIDTH/2 + 5, GAME_HEIGHT*0.48 * Math.sin(angleToCenter) + GAME_HEIGHT/2 + 5, 5);
+        
+        if (distToCenter+player.r+1.5 > GAME_HEIGHT*0.48) {
+            player.x = GAME_HEIGHT*0.48 * Math.cos(angleToCenter) + GAME_WIDTH/2 + player.r + 1.5;
+            player.y = GAME_HEIGHT*0.48 * Math.sin(angleToCenter) + GAME_HEIGHT/2 + player.r + 1.5;
         }
     }
 
@@ -249,7 +255,7 @@ function draw() {
         }
         if (slime.encountered) {
             ctx.strokeStyle = "#00FF00";
-            circle(slime.x+35+mapX, slime.y+35+mapY, GAME_WIDTH*0.3, "stroke");
+            circle(slime.x+35+mapX, slime.y+35+mapY, GAME_HEIGHT*0.48, "stroke");
             if (loopingEncounterColor) {
                 ctx.fillStyle = encounterColor;
                 ctx.fillRect(slime.x+32.5+mapX, slime.y-25+mapY, 5, 20);
