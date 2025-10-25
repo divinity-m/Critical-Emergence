@@ -100,8 +100,8 @@ function circle(x, y, r, type) {
 let slimes = [];
 function makeSlime() {
     let slime = { // width and height are 70
-        x: Math.random() * GAME_WIDTH*2 - GAME_WIDTH/2,
-        y: Math.random() * GAME_HEIGHT*2 - GAME_HEIGHT/2,
+        x: Math.random() * GAME_WIDTH*2 - GAME_WIDTH/2 + mapX,
+        y: Math.random() * GAME_HEIGHT*2 - GAME_HEIGHT/2 + mapY,
         img: document.getElementById("slime-png"),
         index: 0,
         encountered: false,
@@ -109,11 +109,12 @@ function makeSlime() {
     }
 
     function checkSlimeDistances() {
-        let distSlime = Math.hypot(player.x-slime.x+35, player.y-slime.y+35);
+        let distSlime = Math.hypot(player.x - slime.x+35+mapX, player.y - slime.y+35+mapY); // player
         let slimeDistances = [distSlime];
         for (let createdSlime of slimes) {
-            slimeDistances.push(Math.hypot(slime.x-createdSlime.x, slime.y-createdSlime.y));
+            slimeDistances.push(Math.hypot(slime.x - createdSlime.x, slime.y - createdSlime.y)); // other slimes
         }
+        slimeDistances.push(Math.hypot(slime.x+35 - 1150+50, slime.y+35 - GAME_HEIGHT/2)); // sword statue
         return slimeDistances;
     }
     let distances = checkSlimeDistances();
@@ -124,8 +125,8 @@ function makeSlime() {
         for (let i = 0; i < distances.length; i++) {
             if (distances[i] < GAME_WIDTH*0.25) {
                 validPosition = false;
-                slime.x = Math.random() * GAME_WIDTH*2 - GAME_WIDTH/2;
-                slime.y = Math.random() * GAME_HEIGHT*2 - GAME_HEIGHT/2;
+                slime.x = Math.random() * GAME_WIDTH*2 - GAME_WIDTH/2 + mapX;
+                slime.y = Math.random() * GAME_HEIGHT*2 - GAME_HEIGHT/2 + mapY;
                 distances = checkSlimeDistances();
                 break;
             }
@@ -136,7 +137,7 @@ function makeSlime() {
 }
 for (let i = 0; i < 5; i++) slimes.push(makeSlime());
 
-console.log("slime array and screen dimensions");
+console.log("slimes dont spawn next to the sword statue and other slime bugs");
 function draw() {
     now = Date.now();
     detectHover();
