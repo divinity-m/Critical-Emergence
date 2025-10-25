@@ -141,17 +141,21 @@ for (let i = 0; i < 5; i++) slimes.push(makeSlime());
 
 let encounterColor = "#FF000000";
 let loopingEncounterColor = false;
-let encNext = 1;
+let encColorCD = 0;
+let nextEncColor = 1;
 function loopEncounterColor() {
     let encounterColors = ["#FF000000", "#FF000033", "#FF000066", "#FF000099", "#FF0000CC", "#FF0000FF"];
-    for (let i = 0; i < encounterColors.length; i++) {
-        if (encounterColor === encounterColors[i]) encounterColor = encounterColors[i+encNext];
-        if (encounterColor === "#FF0000FF") encNext *= -1;
-        if (encounterColor === "#FF000000") { encNext *= -1; loopingEncounterColor = false;}
+    if (now - nextEncColor > 0.1) {
+        for (let i = 0; i < encounterColors.length; i++) {
+            if (encounterColor === encounterColors[i]) encounterColor = encounterColors[i+nextEncColor];
+            if (encounterColor === "#FF0000FF") nextEncColor *= -1;
+            if (encounterColor === "#FF000000") { nextEncColor *= -1; loopingEncounterColor = false;}
+        }
+        nextEncColor = Date.now();
     }
 }
 
-console.log("encounter trapping 2");
+console.log("encounter trapping 2, enc color");
 function draw() {
     now = Date.now();
     detectHover();
@@ -180,8 +184,11 @@ function draw() {
         let angleToCenter = Math.atan2(player.y - GAME_HEIGHT/2, player.x - GAME_WIDTH/2);
         let distToCenter = Math.hypot(player.x - GAME_WIDTH/2, player.y - GAME_HEIGHT/2);
         
-        ctx.fillStyle = "white";
-        circle(GAME_HEIGHT*0.48 * Math.cos(angleToCenter) + GAME_WIDTH/2 + 5, GAME_HEIGHT*0.48 * Math.sin(angleToCenter) + GAME_HEIGHT/2 + 5, 5);
+        ctx.fillStyle = player.color;
+        ctx.strokeStyle = player.subColor;
+        ctx.lineWidth = 3;
+        circle(GAME_HEIGHT*0.48 * Math.cos(angleToCenter) + GAME_WIDTH/2 + player.r, GAME_HEIGHT*0.48 * Math.sin(angleToCenter) + GAME_HEIGHT/2 + player.r, player.r);
+        circle(GAME_HEIGHT*0.48 * Math.cos(angleToCenter) + GAME_WIDTH/2 + player.r, GAME_HEIGHT*0.48 * Math.sin(angleToCenter) + GAME_HEIGHT/2 + player.r, player.r, "stroke");
         
         if (distToCenter+player.r+1.5 > GAME_HEIGHT*0.48) {
             player.x = GAME_HEIGHT*0.48 * Math.cos(angleToCenter) + GAME_WIDTH/2 + player.r + 1.5;
@@ -243,9 +250,10 @@ function draw() {
         // Encountering
         let distSlime = Math.hypot(player.x - (slime.x+35+mapX), player.y - (slime.y+35+mapY));
         if (distSlime < GAME_WIDTH*0.0652 && !player.inBattle) {
+            player.inBattle = true;
             slime.encountered = true;
             loopingEncounterColor = true;
-            player.inBattle = true;
+            nextEncColor = Date.now();
             let addx = GAME_WIDTH/2 - (slime.x+35+mapX);
             let addy = GAME_HEIGHT/2 - (slime.y+35+mapY);
             mapX += addx;
