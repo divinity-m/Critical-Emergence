@@ -98,7 +98,7 @@ function circle(x, y, r, type) {
     else ctx.fill();
 }
 
-console.log("200ms per sprite");
+console.log("200ms per sprite and shadow redesign");
 function draw() {
     now = Date.now();
     detectHover();
