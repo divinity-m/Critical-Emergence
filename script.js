@@ -98,7 +98,7 @@ function circle(x, y, r, type) {
     else ctx.fill();
 }
 
-console.log("nextSlimeSprite");
+console.log("200ms per sprite");
 function draw() {
     now = Date.now();
     detectHover();
@@ -158,7 +158,7 @@ function draw() {
 
     // Slime (Sprite Sheet Dimensions: Width - 800 | Height - 100)
     ctx.drawImage(document.getElementById("slime-png"), 30 + 100 * slimeIndex, 25, 100, 50, 200, 200, 250, 125);
-    if (now-nextSlimeSprite > 250) { slimeIndex++; nextSlimeSprite = Date.now(); }
+    if (now-nextSlimeSprite > 200) { slimeIndex++; nextSlimeSprite = Date.now(); }
     if (slimeIndex > 7) slimeIndex = 0;
 
     // Player
