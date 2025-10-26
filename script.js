@@ -362,7 +362,7 @@ function draw() {
     }
 
     // Player Bars
-    let barX = cnv.width*0.33-barW*0.5, barY = cnv.height*0.9, barW = cnv.width*0.2, barH = cnv.height*0.025;
+    let barY = cnv.height*0.9, barW = cnv.width*0.2, barH = cnv.height*0.025;
     
     drawStatBar(player, cnv.width*0.33-barW*0.5, barY, barW, barH, 5, cnv.height*0.0175, "#00DD00", "#00BB00", "HEALTH"); // Health Bar
     drawStatBar(player, cnv.width*0.33-barW*0.5, barY, barW, barH, 5, cnv.height*0.0175, "#DDDD00", "#BBBB00", "SHIELD"); // Sheild Bar
