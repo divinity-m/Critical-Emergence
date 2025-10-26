@@ -62,16 +62,19 @@ function clickEventListener(e) {
         player.img = document.getElementById("sword-icon2");
     }
 }
-function mouseMovement() {
+function mouseMovement(mapLimit) {
     if (!kbMovementOn && mouseMovementOn) {
         let dx = mouseX - player.x, dy = mouseY - player.y;
         let dist = Math.hypot(dx, dy);
         let slowFactor = Math.sqrt(Math.min(100, dist)) / 10;
-        player.speed = player.baseSpeed * shiftPressed * slowFactor;
+        let speed = player.speed * shiftPressed * slowFactor;
         if (dist > 0.25) {
-            player.x += dx/dist * player.speed;
-            player.y += dy/dist * player.speed;
+            player.x += dx/dist * speed;
+            player.y += dy/dist * speed;
         }
+        
+        if (player.x < mapLimit || player.x > GAME_WIDTH-mapLimit) mapX -= dx/dist * speed;
+        if (player.y < mapLimit || player.y > GAME_HEIGHT-mapLimit) mapY -= dy/dist * speed;
     }
 }
 
@@ -94,7 +97,7 @@ function keyupEventListener(e) {
     if (e.code === "KeyD" || e.code === "ArrowRight") moveRight = false;
     if (e.code === "ShiftLeft" || e.code === "ShiftRight") shiftPressed = 1;
 }
-function keyboardMovement() {
+function keyboardMovement(mapLimit) {
     let xKb = 0; yKb = 0;
     
     if (moveRight) xKb += 1;
@@ -109,9 +112,12 @@ function keyboardMovement() {
     if (xKb === 0 && yKb === 0) kbMovementOn = false;
     else kbMovementOn = true;
 
-    player.speed = player.baseSpeed * shiftPressed;
-    player.x += xKb * player.speed;
-    player.y += yKb * player.speed;
+    let speed = player.speed * shiftPressed;
+    player.x += xKb * speed;
+    player.y += yKb * speed;
+
+    if (player.x < mapLimit || player.x > GAME_WIDTH-mapLimit) mapX -= xKb * speed;
+    if (player.y < mapLimit || player.y > GAME_HEIGHT-mapLimit) mapY -= yKb * speed;
 }
 
 // Quick Draw functions
@@ -179,7 +185,7 @@ function loopEncounterColor() {
     }
 }
 
-console.log("mouse movement but even better");
+console.log("fixed dashing");
 function draw() {
     now = Date.now();
     detectHover();
@@ -195,22 +201,11 @@ function draw() {
     ctx.fillText(`Player XY: ${Math.round(player.x - mapX)}, ${Math.round(player.y - mapY)}`, 15, 50);
     
     // Movement
-    keyboardMovement();
-    mouseMovement();
     let mapLimit;
     if (player.inBattle) mapLimit = 0;
     else mapLimit = 150;
-    
-    let dx = 1, dy = 1, dist = 1;
-    if (mouseMovementOn && !kbMovementOn) {
-        let dx = Math.abs(mouseX - player.x), dy = Math.abs(mouseY - player.y);
-        let dist = Math.hypot(dx, dy);
-    }
-    
-    if (player.x < mapLimit) mapX += player.speed * (dx/dist);
-    if (player.x > GAME_WIDTH-mapLimit) mapX -= player.speed * (dx/dist);
-    if (player.y < mapLimit) mapY += player.speed * (dy/dist);
-    if (player.y > GAME_HEIGHT-mapLimit) mapY -= player.speed * (dy/dist);
+    keyboardMovement(mapLimit);
+    mouseMovement(mapLimit);
     
     player.x = Math.min(Math.max(player.x, mapLimit), GAME_WIDTH-mapLimit);
     player.y = Math.min(Math.max(player.y, mapLimit), GAME_HEIGHT-mapLimit);
