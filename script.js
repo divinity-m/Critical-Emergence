@@ -248,7 +248,7 @@ function drawEnemyBorderAndStats(enemy, w, borderColor) {
     }
 }
 
-console.log("slime health 2");
+console.log("slime health 3");
 function draw() {
     now = Date.now();
     detectHover();
