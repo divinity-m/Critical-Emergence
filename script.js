@@ -132,6 +132,13 @@ function circle(x, y, r, type) {
     if (type === "stroke") ctx.stroke();
     else ctx.fill();
 }
+function roundRect(x, y, w, h, r, type) {
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, r);
+    ctx.stroke();
+    if (type === "stroke") ctx.stroke();
+    else ctx.fill();
+}
 
 // Game related functions
 let slimes = [];
@@ -190,7 +197,7 @@ function loopEncounterColor() {
     }
 }
 
-console.log("sword equip and unequip");
+console.log("Health, Shield, Mana");
 function draw() {
     now = Date.now();
     detectHover();
@@ -312,6 +319,9 @@ function draw() {
     circle(player.x, player.y, player.r, "stroke");
     let corner = player.r*Math.sin(45);
     ctx.drawImage(player.img, player.x-17.5, player.y-16, 35, 35);
+
+    // Health Bar
+    
 
     // Border
     ctx.strokeStyle = "#000000";
