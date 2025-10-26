@@ -143,17 +143,18 @@ function roundRect(x, y, w, h, r, type) {
 function drawStatBar(entity, x, y, w, h, lW, font, fill, stroke, stat) {
     if (stat === "SHIELD" && entity.shield <= 0) return;
     ctx.lineWidth = lW;
-    ctx.font = `${font}px Verdana`;
+    ctx.font = `bold ${font}px Verdana`;
     ctx.textAlign = "center";
+    
+    const realStat = stat.toLowerCase();
+    const maxStat = "max" + stat[0] + stat.substring(1).toLowerCase();
         
     ctx.fillStyle = fill;
     ctx.strokeStyle = stroke;
     roundRect(x, y, w, h, 100, "stroke");
-    roundRect(x, y, entity.health / entity.maxHealth * w, h, 100, "fill");
+    roundRect(x, y, entity[realStat]/entity[maxStat] * w, h, 100, "fill");
     
     ctx.fillStyle = stroke;
-    const realStat = stat.toLowerCase();
-    const maxStat = "max" + stat[0] + stat.substring(1).toLowerCase();
     if (stat != "HEALTH" || (stat === "HEALTH" && entity.shield <= 0)) ctx.fillText(`${stat}: ${entity[realStat]}/${entity[maxStat]}`, x + w*0.5, y+h*0.75);
 }
 
@@ -166,7 +167,7 @@ function makeSlime() {
         y: Math.random() * GAME_HEIGHT*2 - GAME_HEIGHT/2 + mapY,
         img: document.getElementById("slime-png"), sprite: 0,
         encountered: false, defeated: false,
-        maxHealth: Math.round(Math.random() * 100 + 50), maxShield: 0, shield: 0,
+        maxHealth: Math.round(Math.random() * 50 + 100), maxShield: 100, shield: 70,
     }
     slime.health = slime.maxHealth;
 
@@ -239,10 +240,11 @@ function drawEnemyBorderAndStats(enemy, w, borderColor) {
             circle(enemy.x+w+mapX, enemy.y+5+mapY, 2.75);
             loopEncounterColor();
         }
-        
-        // Health Bar
+
+        // Health and Shield Bar
         const barX = GAME_WIDTH*0.25, barY = GAME_HEIGHT*0.05, barW = GAME_WIDTH*0.5, barH = GAME_HEIGHT*0.035;
         drawStatBar(enemy, barX, barY, barW, barH, 10, GAME_HEIGHT*0.02, "#00DD00", "#00BB00", "HEALTH");
+        drawStatBar(enemy, barX, barY, barW, barH, 10, GAME_HEIGHT*0.02, "#DDDD00", "#BBBB00", "SHIELD");
     }
 }
 
