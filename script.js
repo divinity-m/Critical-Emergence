@@ -13,8 +13,10 @@ const GAME_WIDTH = window.screen.width, GAME_HEIGHT = window.screen.height; // t
 let player = {
     x: GAME_WIDTH*0.5, y: GAME_HEIGHT*0.5, r: 15,
     speed: GAME_WIDTH/275, baseSpeed: GAME_WIDTH/275,
-    color: "#FFFFFF", subColor: "#E6E6E6",
+    color: "#FFFFFFCC", subColor: "#E6E6E6",
     weapon: "fist", img: document.getElementById("fist-icon"), inBattle: false,
+    equipFist: function () { this.color = "#FFFFFFCC"; this.subColor = "#E6E6E6"; this.weapon = "fist"; this.img = document.getElementById("fist-icon"); },
+    equipSword: function() { this.color = "#FF0000CC"; this.subColor = "#E60000"; this.weapon = "sword"; this.img = document.getElementById("sword-icon2"); },
 }
 let now = Date.now();
 let mapY = 0, mapX = 0;
@@ -33,7 +35,7 @@ let dash = {
             this.accel = 1;
             this.lastEnded = Date.now();
         }
-    }
+    },
 };
 
 // Mouse
@@ -60,10 +62,8 @@ function detectHover() {
 }
 function clickEventListener(e) {
     if (mouseover.equipSword) {
-        player.color = "#FF0000CC";
-        player.subColor = "#E60000";
-        player.weapon = "sword";
-        player.img = document.getElementById("sword-icon2");
+        if (player.weapon != "sword") player.equipSword();
+        else player.equipFist();
     }
 }
 function mouseMovement(mapLimit) {
@@ -189,7 +189,7 @@ function loopEncounterColor() {
     }
 }
 
-console.log("player fist icon");
+console.log("sword equip and unequip");
 function draw() {
     now = Date.now();
     detectHover();
@@ -262,8 +262,9 @@ function draw() {
         
         ctx.fillStyle = "#FF0000";
         ctx.textAlign = "center";
-        ctx.font = "bold 15px Verdana";
-        ctx.fillText("Equip Sword", 1150+50+mapX, GAME_HEIGHT/2+75+mapY);
+        ctx.font = "bold 12px Verdana";
+        if (player.weapon != "sword") ctx.fillText(`Equip Sword`, 1150+50+mapX, GAME_HEIGHT/2+75+mapY);
+        else ctx.fillText(`Unequip Sword`, 1150+50+mapX, GAME_HEIGHT/2+75+mapY);
     }
 
     // Slime (Sprite Sheet Dimensions: Width - 800 | Height - 100)
