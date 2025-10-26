@@ -152,9 +152,9 @@ function drawStatBar(entity, x, y, w, h, lW, font, fill, stroke, stat) {
     roundRect(x, y, entity.health / entity.maxHealth * w, h, 100, "fill");
     
     ctx.fillStyle = stroke;
-    const lowercaseStat = stat.toLowerCase();
+    const realStat = stat.toLowerCase();
     const maxStat = "max" + stat[0] + stat.substring(1).toLowerCase();
-    if (stat != "HEALTH" || (stat === "HEALTH" && entity.shield <= 0)) ctx.fillText(`${stat}: ${entity[currentStat]}/${entity[maxStat]}`, x + w*0.5, y+h*0.75);
+    if (stat != "HEALTH" || (stat === "HEALTH" && entity.shield <= 0)) ctx.fillText(`${stat}: ${entity[realStat]}/${entity[maxStat]}`, x + w*0.5, y+h*0.75);
 }
 
 // Game related functions
