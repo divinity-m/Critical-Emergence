@@ -140,24 +140,41 @@ function roundRect(x, y, w, h, r, type) {
     if (type === "stroke") ctx.stroke();
     else ctx.fill();
 }
+function drawStatBar(entity, x, y, w, h, lW, font, fill, stroke, stat) {
+    let barX = cnv.width*0.25, barY = cnv.height*0.01-cnv.height*0.035, barW = cnv.width*0.5, barH = cnv.height*0.035;
+    
+    ctx.lineWidth = lW;
+    ctx.font = `${font}px Verdana`;
+    ctx.textAlign = "center";
+        
+    ctx.fillStyle = fill;
+    ctx.strokeStyle = stroke;
+    roundRect(x, y, w, h, 100, "stroke");
+    roundRect(x, y, entity.health / entity.maxHealth * w, h, 100, "fill");
+    
+    ctx.fillStyle = stroke;
+    if (stat != "HEALTH") ctx.fillText(`${stat}: ${entity.health}/${entity.maxHealth}`, x + w*0.5, y+h*0.75);
+    if (stat === "HEALTH" && entity.shield <= 0) ctx.fillText(`${stat}: ${entity.health}/${entity.maxHealth}`, x + w*0.5, y+h*0.75);
+}
 
 // Game related functions
-let slimes = [];
+let enemies = [];
 function makeSlime() {
     let slime = { // width and height are 70
+        type: "slime",
         x: Math.random() * GAME_WIDTH*2 - GAME_WIDTH/2 + mapX,
         y: Math.random() * GAME_HEIGHT*2 - GAME_HEIGHT/2 + mapY,
-        img: document.getElementById("slime-png"),
-        index: 0,
-        encountered: false,
-        defeated: false,
+        img: document.getElementById("slime-png"), sprite: 0,
+        encountered: false, defeated: false,
+        maxHealth: Math.round(Math.random() * 100 + 50), maxShield: 0, shield: 0,
     }
+    slime.health = slime.maxHealth;
 
     function checkSlimeDistances() {
         let distSlime = Math.hypot(player.x - slime.x+35+mapX, player.y - slime.y+35+mapY); // player
         let slimeDistances = [distSlime];
-        for (let createdSlime of slimes) {
-            slimeDistances.push(Math.hypot(slime.x - createdSlime.x, slime.y - createdSlime.y)); // other slimes
+        for (let enemy of enemies) {
+            if (enemy.type === "slime") slimeDistances.push(Math.hypot(slime.x - enemy.x, slime.y - enemy.y)); // other slimes
         }
         slimeDistances.push(Math.hypot(slime.x+35 - 1150+50, slime.y+35 - GAME_HEIGHT/2)); // sword statue
         return slimeDistances;
@@ -180,7 +197,7 @@ function makeSlime() {
     slime.nextSprite = Date.now();
     return slime;
 }
-for (let i = 0; i < 5; i++) slimes.push(makeSlime());
+for (let i = 0; i < 5; i++) enemies.push(makeSlime());
 
 let encounterColor = "#FF000000";
 let loopingEncounterColor = false;
@@ -198,7 +215,50 @@ function loopEncounterColor() {
     }
 }
 
-console.log("Health, Shield, Mana");
+function enemyEncountered(enemy, w, distance, encounterDistance) {
+    if (distance < encounterDistance && !player.inBattle) {
+        player.inBattle = true;
+        enemy.encountered = true;
+        loopingEncounterColor = true;
+        encColorCD = Date.now();
+        let addX = GAME_WIDTH/2 - (enemy.x+w+mapX);
+        let addY = GAME_HEIGHT/2 - (enemy.y+w+mapY);
+        [mapX, mapY, player.x, player.y] = [mapX+addX, mapY+addY, player.x+addX, player.y+addY];
+    }
+}
+
+function drawEnemyBorderAndStats(enemy, w, borderColor) {
+    if (enemy.encountered) {
+        // Border Circle
+        ctx.strokeStyle = borderColor;
+        circle(enemy.x+w+mapX, enemy.y+w+mapY, GAME_HEIGHT*0.48, "stroke");
+        if (loopingEncounterColor) {
+            // Exclamation Mark
+            ctx.fillStyle = encounterColor;
+            ctx.fillRect(enemy.x+w-2.5+mapX, enemy.y-25+mapY, 5, 20);
+            circle(enemy.x+w+mapX, enemy.y+5+mapY, 2.75);
+            loopEncounterColor();
+        }
+        
+        // Health Bar
+        let barX = cnv.width*0.25, barY = cnv.height*0.01-cnv.height*0.035, barW = cnv.width*0.5, barH = cnv.height*0.035;
+        drawStatBar(enemy, barX, barY, barW, barH, 10, cnv.height*0.02, "#00DD00", "#00BB00", "HEALTH");
+        
+        // ctx.lineWidth = 10;
+        // ctx.font = `${cnv.height*0.02}px Verdana`;
+        // ctx.textAlign = "center";
+        
+        // ctx.fillStyle = "#00DD00";
+        // ctx.strokeStyle = "#00BB00";
+        // roundRect(barX, barY, barW, barH, 100, "stroke");
+        // roundRect(barX, barY, enemy.health / enemy.maxHealth * barW, barH, 100, "fill");
+    
+        // ctx.fillStyle = "#00BB00";
+        // if (enemy.shield <= 0) ctx.fillText(`HEALTH: ${enemy.health}/${enemy.maxHealth}`, cnv.width*0.5, barY+barH*0.75);
+    }
+}
+
+console.log("slime health");
 function draw() {
     now = Date.now();
     detectHover();
@@ -273,40 +333,16 @@ function draw() {
     }
 
     // Slime (Sprite Sheet Dimensions: Width - 800 | Height - 100)
-    for (let slime of slimes) {
-        // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
-        ctx.drawImage(slime.img, 34.5 + 100 * slime.index, 35, 30, 30, slime.x+mapX, slime.y+mapY, 70, 70);
-        if (now-slime.nextSprite > 200) { slime.index++; slime.nextSprite = Date.now(); }
-        if (slime.index > 7) slime.index = 0;
-        ctx.strokeStyle = "#00FF00";
-        if (!slime.encountered) circle(slime.x+35+mapX, slime.y+35+mapY, GAME_WIDTH*0.0652-player.r-1.5, "stroke");
-    
-        // Encountering
-        let distSlime = Math.hypot(player.x - (slime.x+35+mapX), player.y - (slime.y+35+mapY));
-        if (distSlime < GAME_WIDTH*0.0652 && !player.inBattle) {
-            player.inBattle = true;
-            slime.encountered = true;
-            loopingEncounterColor = true;
-            encColorCD = Date.now();
-            let addx = GAME_WIDTH/2 - (slime.x+35+mapX);
-            let addy = GAME_HEIGHT/2 - (slime.y+35+mapY);
-            mapX += addx;
-            mapY += addy;
-            player.x += addx;
-            player.y += addy;
-        }
-        if (slime.encountered) {
+    for (let slime of enemies) {
+        if (slime.type === "slime") {
+            // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+            ctx.drawImage(slime.img, 34.5 + 100 * slime.sprite, 35, 30, 30, slime.x+mapX, slime.y+mapY, 70, 70);
+            if (now-slime.nextSprite > 200) { slime.sprite++; slime.nextSprite = Date.now(); }
+            if (slime.sprite > 7) slime.sprite = 0;
             ctx.strokeStyle = "#00FF00";
-            circle(slime.x+35+mapX, slime.y+35+mapY, GAME_HEIGHT*0.48, "stroke");
-            if (loopingEncounterColor) {
-                ctx.fillStyle = encounterColor;
-                ctx.fillRect(slime.x+32.5+mapX, slime.y-25+mapY, 5, 20);
-                circle(slime.x+35+mapX, slime.y+5+mapY, 2.75);
-            }
+            if (!slime.encountered) circle(slime.x+35+mapX, slime.y+35+mapY, GAME_WIDTH*0.0652-player.r-1.5, "stroke");
         }
     }
-
-    if (loopingEncounterColor) loopEncounterColor();
 
     // Player
     ctx.fillStyle = player.color;
@@ -317,40 +353,53 @@ function draw() {
     let corner = player.r*Math.sin(45);
     ctx.drawImage(player.img, player.x-17.5, player.y-16, 35, 35);
 
-    // Player Bars
-    let barY = cnv.height*0.9, barW = cnv.width*0.2, barH = cnv.height*0.025, barR = 100;
-    ctx.lineWidth = 5;
-    ctx.font = `${cnv.height*0.0175}px Verdana`;
-    ctx.textAlign = "center";
-    
-    // Health Bar
-    ctx.fillStyle = "#00DD00";
-    ctx.strokeStyle = "#00BB00";
-    roundRect(cnv.width*0.33-barW*0.5, barY, barW, barH, barR, "stroke");
-    roundRect(cnv.width*0.33-barW*0.5, barY, player.health / player.maxHealth * barW, barH, barR, "fill");
-
-    ctx.fillStyle = "#00BB00";
-    ctx.fillText(`HEALTH: ${player.health}/${player.maxHealth}`, cnv.width*0.33, barY+barH*0.75);
-
-    // Shield Bar
-    if (player.shield > 0) {
-        ctx.fillStyle = "#DDDD00";
-        ctx.strokeStyle = "#BBBB00";
-        roundRect(cnv.width*0.33-barW*0.5, barY, barW, barH, barR, "stroke");
-        roundRect(cnv.width*0.33-barW*0.5, barY, player.shield / player.maxShield * barW, barH, barR, "fill");
-
-        ctx.fillStyle = "#BBBB00";
-        ctx.fillText(`SHIELD: ${player.shield}/${player.maxShield}`, cnv.width*0.33, barY+barH*0.75);
+    // Encountering
+    for (let enemy of enemies) {
+        if (enemy.type === "slime") {
+            enemyEncountered(enemy, 35, Math.hypot(player.x - (slime.x+35+mapX), player.y - (slime.y+35+mapY)), GAME_WIDTH*0.0652);
+            drawEnemyBorderAndStats(enemy, 35, "#00FF00");
+        }
     }
 
-    // Mana Bar
-    ctx.fillStyle = "#0000FF";
-    ctx.strokeStyle = "#0000BB";
-    roundRect(cnv.width*0.66-barW*0.5, barY, barW, barH, barR, "stroke");
-    roundRect(cnv.width*0.66-barW*0.5, barY, player.mana / player.maxMana * barW, barH, barR, "fill");
+    // Player Bars
+    let barX = cnv.width*0.33-barW*0.5, barY = cnv.height*0.9, barW = cnv.width*0.2, barH = cnv.height*0.025;
+    
+    drawStatBar(player, cnv.width*0.33-barW*0.5, barY, barW, barH, 5, cnv.height*0.0175, "#00DD00", "#00BB00", "HEALTH"); // Health Bar
+    drawStatBar(player, cnv.width*0.33-barW*0.5, barY, barW, barH, 5, cnv.height*0.0175, "#DDDD00", "#BBBB00", "SHIELD"); // Sheild Bar
+    drawStatBar(player, cnv.width*0.66-barW*0.5, barY, barW, barH, 5, cnv.height*0.0175, "#0000FF", "#0000BB", "MANA"); // Mana Bar
+    
+    // ctx.lineWidth = 5;
+    // ctx.font = `${cnv.height*0.0175}px Verdana`;
+    // ctx.textAlign = "center";
+    
+    // // Health Bar
+    // ctx.fillStyle = "#00DD00";
+    // ctx.strokeStyle = "#00BB00";
+    // roundRect(cnv.width*0.33-barW*0.5, barY, barW, barH, barR, "stroke");
+    // roundRect(cnv.width*0.33-barW*0.5, barY, player.health / player.maxHealth * barW, barH, barR, "fill");
 
-    ctx.fillStyle = "#0000BB";
-    ctx.fillText(`MANA: ${player.mana}/${player.maxMana}`, cnv.width*0.66, barY+barH*0.75);
+    // ctx.fillStyle = "#00BB00";
+    // if (player.shield <= 0) ctx.fillText(`HEALTH: ${player.health}/${player.maxHealth}`, cnv.width*0.33, barY+barH*0.75);
+
+    // // Shield Bar
+    // if (player.shield > 0) {
+    //     ctx.fillStyle = "#DDDD00";
+    //     ctx.strokeStyle = "#BBBB00";
+    //     roundRect(cnv.width*0.33-barW*0.5, barY, barW, barH, barR, "stroke");
+    //     roundRect(cnv.width*0.33-barW*0.5, barY, player.shield / player.maxShield * barW, barH, barR, "fill");
+
+    //     ctx.fillStyle = "#BBBB00";
+    //     ctx.fillText(`SHIELD: ${player.shield}/${player.maxShield}`, cnv.width*0.33, barY+barH*0.75);
+    // }
+
+    // // Mana Bar
+    // ctx.fillStyle = "#0000FF";
+    // ctx.strokeStyle = "#0000BB";
+    // roundRect(cnv.width*0.66-barW*0.5, barY, barW, barH, barR, "stroke");
+    // roundRect(cnv.width*0.66-barW*0.5, barY, player.mana / player.maxMana * barW, barH, barR, "fill");
+
+    // ctx.fillStyle = "#0000BB";
+    // ctx.fillText(`MANA: ${player.mana}/${player.maxMana}`, cnv.width*0.66, barY+barH*0.75);
 
     // Border
     ctx.strokeStyle = "#000000";
