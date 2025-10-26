@@ -152,9 +152,9 @@ function drawStatBar(entity, x, y, w, h, lW, font, fill, stroke, stat) {
     roundRect(x, y, entity.health / entity.maxHealth * w, h, 100, "fill");
     
     ctx.fillStyle = stroke;
-    let lowercaseStat = stat.toLowerCase();
-    let maxStat = "max" + stat[0] + stat.substring(1).toLowerCase();
-    if (stat != "HEALTH" || (stat === "HEALTH" && entity.shield <= 0)) ctx.fillText(`${stat}: ${entity.[currentStat]}/${entity.[maxStat]}`, x + w*0.5, y+h*0.75);
+    const lowercaseStat = stat.toLowerCase();
+    const maxStat = "max" + stat[0] + stat.substring(1).toLowerCase();
+    if (stat != "HEALTH" || (stat === "HEALTH" && entity.shield <= 0)) ctx.fillText(`${stat}: ${entity[currentStat]}/${entity[maxStat]}`, x + w*0.5, y+h*0.75);
 }
 
 // Game related functions
@@ -221,8 +221,8 @@ function enemyEncountered(enemy, w, distance, encounterDistance) {
         enemy.encountered = true;
         loopingEncounterColor = true;
         encColorCD = Date.now();
-        let addX = GAME_WIDTH/2 - (enemy.x+w+mapX);
-        let addY = GAME_HEIGHT/2 - (enemy.y+w+mapY);
+        const addX = GAME_WIDTH/2 - (enemy.x+w+mapX);
+        const addY = GAME_HEIGHT/2 - (enemy.y+w+mapY);
         [mapX, mapY, player.x, player.y] = [mapX+addX, mapY+addY, player.x+addX, player.y+addY];
     }
 }
@@ -241,7 +241,7 @@ function drawEnemyBorderAndStats(enemy, w, borderColor) {
         }
         
         // Health Bar
-        let barX = GAME_WIDTH*0.25, barY = GAME_HEIGHT*0.05, barW = GAME_WIDTH*0.5, barH = GAME_HEIGHT*0.035;
+        const barX = GAME_WIDTH*0.25, barY = GAME_HEIGHT*0.05, barW = GAME_WIDTH*0.5, barH = GAME_HEIGHT*0.035;
         drawStatBar(enemy, barX, barY, barW, barH, 10, GAME_HEIGHT*0.02, "#00DD00", "#00BB00", "HEALTH");
     }
 }
@@ -272,8 +272,8 @@ function draw() {
     player.y = Math.min(Math.max(player.y, mapLimit), GAME_HEIGHT-mapLimit);
 
     if (player.inBattle) {
-        let angleToCenter = Math.atan2(player.y - GAME_HEIGHT/2, player.x - GAME_WIDTH/2);
-        let distToCenter = Math.hypot(player.x - GAME_WIDTH/2, player.y - GAME_HEIGHT/2);
+        const angleToCenter = Math.atan2(player.y - GAME_HEIGHT/2, player.x - GAME_WIDTH/2);
+        const distToCenter = Math.hypot(player.x - GAME_WIDTH/2, player.y - GAME_HEIGHT/2);
         
         if (distToCenter+player.r+1.5+1.375 > GAME_HEIGHT*0.48) {
             player.x = GAME_HEIGHT*0.48 * Math.cos(angleToCenter) + GAME_WIDTH/2 - (player.r+1.5+1.375) * Math.cos(angleToCenter);
@@ -306,7 +306,7 @@ function draw() {
     ctx.fillRect(1150+mapX, GAME_HEIGHT/2-50+mapY, 100, 100);
     ctx.drawImage(document.getElementById("sword-icon"), 1150+mapX, GAME_HEIGHT/2-50+mapY, 100, 100);
     ctx.strokeRect(1150+mapX, GAME_HEIGHT/2-50+mapY, 100, 100);
-    let distSword = Math.hypot(player.x - (1150+50+mapX), player.y - (GAME_HEIGHT/2+mapY));
+    const distSword = Math.hypot(player.x - (1150+50+mapX), player.y - (GAME_HEIGHT/2+mapY));
     if (distSword < 150) {
         ctx.lineWidth = 1.25;
         if (mouseover.equipSword) ctx.fillStyle = "#FF000025";
@@ -338,7 +338,6 @@ function draw() {
     ctx.lineWidth = 3;
     circle(player.x, player.y, player.r, "fill");
     circle(player.x, player.y, player.r, "stroke");
-    let corner = player.r*Math.sin(45);
     ctx.drawImage(player.img, player.x-17.5, player.y-16, 35, 35);
 
     // Encountering
@@ -350,10 +349,9 @@ function draw() {
     }
 
     // Player Bars
-    let barY = GAME_HEIGHT*0.925, barW = GAME_WIDTH*0.2, barH = GAME_HEIGHT*0.025;
-    
+    const barY = GAME_HEIGHT*0.925, barW = GAME_WIDTH*0.2, barH = GAME_HEIGHT*0.025;
     drawStatBar(player, GAME_WIDTH*0.33-barW*0.5, barY, barW, barH, 5, GAME_HEIGHT*0.0175, "#00DD00", "#00BB00", "HEALTH"); // Health Bar
-    drawStatBar(player, GAME_WIDTH*0.33-barW*0.5, barY, barW, barH, 5, GAME_HEIGHT*0.0175, "#DDDD00", "#BBBB00", "SHIELD"); // Sheild Bar
+    drawStatBar(player, GAME_WIDTH*0.33-barW*0.5, barY, barW, barH, 5, GAME_HEIGHT*0.0175, "#DDDD00", "#BBBB00", "SHIELD"); // Shield Bar
     drawStatBar(player, GAME_WIDTH*0.66-barW*0.5, barY, barW, barH, 5, GAME_HEIGHT*0.0175, "#0000FF", "#0000BB", "MANA"); // Mana Bar
 
     // Border
