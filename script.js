@@ -11,7 +11,10 @@ const GAME_WIDTH = window.screen.width, GAME_HEIGHT = window.screen.height; // t
 
 // Variables
 let player = {
-    x: GAME_WIDTH*0.5, y: GAME_HEIGHT*0.5, r: 15, speed: GAME_WIDTH/275, baseSpeed: GAME_WIDTH/275, color: "#FFFFFF", subColor: "#E6E6E6", img: "none", inBattle: false,
+    x: GAME_WIDTH*0.5, y: GAME_HEIGHT*0.5, r: 15,
+    speed: GAME_WIDTH/275, baseSpeed: GAME_WIDTH/275,
+    color: "#FFFFFF", subColor: "#E6E6E6",
+    weapon: "fist", img: document.getElementById("fist-icon"), inBattle: false,
 }
 let now = Date.now();
 let mapY = 0, mapX = 0;
@@ -59,6 +62,7 @@ function clickEventListener(e) {
     if (mouseover.equipSword) {
         player.color = "#FF0000CC";
         player.subColor = "#E60000";
+        player.weapon = "sword";
         player.img = document.getElementById("sword-icon2");
     }
 }
@@ -185,7 +189,7 @@ function loopEncounterColor() {
     }
 }
 
-console.log("fixed dashing");
+console.log("player fist icon");
 function draw() {
     now = Date.now();
     detectHover();
@@ -305,7 +309,7 @@ function draw() {
     circle(player.x, player.y, player.r, "fill");
     circle(player.x, player.y, player.r, "stroke");
     let corner = player.r*Math.sin(45);
-    if (player.img != "none") ctx.drawImage(player.img, player.x-17.5, player.y-16, 35, 35);
+    ctx.drawImage(player.img, player.x-17.5, player.y-16, 35, 35);
 
     // Border
     ctx.strokeStyle = "#000000";
