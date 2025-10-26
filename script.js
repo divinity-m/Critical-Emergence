@@ -11,14 +11,22 @@ const GAME_WIDTH = window.screen.width, GAME_HEIGHT = window.screen.height; // t
 
 // Variables
 let player = {
+    type: "player",
     x: GAME_WIDTH*0.5, y: GAME_HEIGHT*0.5, r: 15,
     speed: GAME_WIDTH/275, baseSpeed: GAME_WIDTH/275,
     color: "#FFFFFFCC", subColor: "#E6E6E6",
-    health: 100, shield: 0, mana: 250,
     maxHealth: 100, maxShield: 0, maxMana: 250,
+    health: 100, shield: 0, mana: 250,
     weapon: "fist", img: document.getElementById("fist-icon"), inBattle: false,
     equipFist: function () { this.color = "#FFFFFFCC"; this.subColor = "#E6E6E6"; this.weapon = "fist"; this.img = document.getElementById("fist-icon"); },
     equipSword: function() { this.color = "#FF0000CC"; this.subColor = "#E60000"; this.weapon = "sword"; this.img = document.getElementById("sword-icon2"); },
+    spawnedAttacks: [], newAttackCd: 0, spawnAttack: function () {
+        let attack;
+        if (player.weapon === "fist") {
+            attack = { x: Math.random() * 100, y: Math.random() * 100, name: "punch", color: "#FFFFFF", };
+        }
+        return attack;
+    },
 }
 let now = Date.now();
 let mapY = 0, mapX = 0;
@@ -155,7 +163,10 @@ function drawStatBar(entity, x, y, w, h, lW, font, fill, stroke, stat) {
     roundRect(x, y, entity[realStat]/entity[maxStat] * w, h, 100, "fill");
     
     ctx.fillStyle = stroke;
-    if (stat != "HEALTH" || (stat === "HEALTH" && entity.shield <= 0)) ctx.fillText(`${stat}: ${entity[realStat]}/${entity[maxStat]}`, x + w*0.5, y+h*0.75);
+    if (stat != "HEALTH" || (stat === "HEALTH" && entity.shield <= 0)) {
+        if (entity.type != "player") stat = `ENEMY ${stat}`;
+        ctx.fillText(`${stat}: ${entity[realStat]}/${entity[maxStat]}`, x + w*0.5, y+h*0.75);
+    }
 }
 
 // Game related functions
@@ -167,7 +178,7 @@ function makeSlime() {
         y: Math.random() * GAME_HEIGHT*2 - GAME_HEIGHT/2 + mapY,
         img: document.getElementById("slime-png"), sprite: 0,
         encountered: false, defeated: false,
-        maxHealth: Math.round(Math.random() * 50 + 100), maxShield: 100, shield: 70,
+        maxHealth: Math.round(Math.random() * 50 + 100), maxShield: 0, shield: 0,a
     }
     slime.health = slime.maxHealth;
 
@@ -242,20 +253,20 @@ function drawEnemyBorderAndStats(enemy, w, borderColor) {
         }
 
         // Health and Shield Bar
-        const barX = GAME_WIDTH*0.25, barY = GAME_HEIGHT*0.05, barW = GAME_WIDTH*0.5, barH = GAME_HEIGHT*0.035;
-        drawStatBar(enemy, barX, barY, barW, barH, 10, GAME_HEIGHT*0.02, "#00DD00", "#00BB00", "HEALTH");
-        drawStatBar(enemy, barX, barY, barW, barH, 10, GAME_HEIGHT*0.02, "#DDDD00", "#BBBB00", "SHIELD");
+        const barX = GAME_WIDTH*0.05, barY = GAME_HEIGHT*0.075, barW = GAME_WIDTH*0.25, barH = GAME_HEIGHT*0.03;
+        drawStatBar(enemy, barX, barY, barW, barH, 7.5, GAME_HEIGHT*0.02, "#00DD00", "#00BB00", "HEALTH");
+        drawStatBar(enemy, barX, barY, barW, barH, 7.5, GAME_HEIGHT*0.02, "#DDDD00", "#BBBB00", "SHIELD");
     }
 }
 
-console.log("slime health 3");
+console.log("divine, heavily adjust the dimensions of where attacks spawn by using trig");
 function draw() {
     now = Date.now();
     detectHover();
     
     // Background #RRGGBBAA
     ctx.fillStyle = "#00C800";
-    ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+    ctx.fillRect(0, 0, cnv.width, cnv.height);
 
     ctx.fillStyle = "#999999";
     ctx.font = "10px Verdana";
@@ -334,6 +345,24 @@ function draw() {
         }
     }
 
+    // Spawn Abilities During Battle
+    if (player.inBattle) {
+        if (now - player.newAttackCd > 3000) {
+            if (player.weapon === "fist") player.spawnedAttacks.push(player.spawnAttack());
+            player.newAttackCd = Date.now();
+        }
+
+        for (let attack of player.spawnedAttacks) {
+            ctx.strokeStyle = attack.color;
+            circle(attack.x, attack.y, 50, "stroke");
+
+            ctx.fillStyle = attack.color;
+            ctx.font = "bold 15px Verdana";
+            ctx.textAlign = "center";
+            ctx.fillText(attack.name, attack.x, attack.y);
+        }
+    }
+
     // Player
     ctx.fillStyle = player.color;
     ctx.strokeStyle = player.subColor;
@@ -342,7 +371,7 @@ function draw() {
     circle(player.x, player.y, player.r, "stroke");
     ctx.drawImage(player.img, player.x-17.5, player.y-16, 35, 35);
 
-    // Encountering
+    // Enemy Encountering, Border, and Health/Shield
     for (let enemy of enemies) {
         if (enemy.type === "slime") {
             enemyEncountered(enemy, 35, Math.hypot(player.x - (enemy.x+35+mapX), player.y - (enemy.y+35+mapY)), GAME_WIDTH*0.0652);
@@ -352,9 +381,12 @@ function draw() {
 
     // Player Bars
     const barY = GAME_HEIGHT*0.925, barW = GAME_WIDTH*0.2, barH = GAME_HEIGHT*0.025;
-    drawStatBar(player, GAME_WIDTH*0.33-barW*0.5, barY, barW, barH, 5, GAME_HEIGHT*0.0175, "#00DD00", "#00BB00", "HEALTH"); // Health Bar
-    drawStatBar(player, GAME_WIDTH*0.33-barW*0.5, barY, barW, barH, 5, GAME_HEIGHT*0.0175, "#DDDD00", "#BBBB00", "SHIELD"); // Shield Bar
-    drawStatBar(player, GAME_WIDTH*0.66-barW*0.5, barY, barW, barH, 5, GAME_HEIGHT*0.0175, "#0000FF", "#0000BB", "MANA"); // Mana Bar
+    let [barX1, barX2] = [GAME_WIDTH*0.33-barW*0.5, GAME_WIDTH*0.66-barW*0.5];
+    if (player.inBattle) [barX1, barX2] = [GAME_WIDTH*0.25-barW*0.5, GAME_WIDTH*0.75-barW*0.5];
+    
+    drawStatBar(player, barX1, barY, barW, barH, 5, GAME_HEIGHT*0.0175, "#00DD00", "#00BB00", "HEALTH"); // Health Bar
+    drawStatBar(player, barX1, barY, barW, barH, 5, GAME_HEIGHT*0.0175, "#DDDD00", "#BBBB00", "SHIELD"); // Shield Bar
+    drawStatBar(player, barX2, barY, barW, barH, 5, GAME_HEIGHT*0.0175, "#0000FF", "#0000BB", "MANA"); // Mana Bar
 
     // Border
     ctx.strokeStyle = "#000000";
