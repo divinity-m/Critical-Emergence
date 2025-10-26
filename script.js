@@ -356,7 +356,7 @@ function draw() {
     // Encountering
     for (let enemy of enemies) {
         if (enemy.type === "slime") {
-            enemyEncountered(enemy, 35, Math.hypot(player.x - (slime.x+35+mapX), player.y - (slime.y+35+mapY)), GAME_WIDTH*0.0652);
+            enemyEncountered(enemy, 35, Math.hypot(player.x - (enemy.x+35+mapX), player.y - (enemy.y+35+mapY)), GAME_WIDTH*0.0652);
             drawEnemyBorderAndStats(enemy, 35, "#00FF00");
         }
     }
