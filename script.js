@@ -191,7 +191,7 @@ function draw() {
     detectHover();
     
     // Background #RRGGBBAA
-    ctx.fillStyle = "#C8C8C8";
+    ctx.fillStyle = "#00C800";
     ctx.fillRect(0, 0, cnv.width, cnv.height);
 
     ctx.fillStyle = "#999999";
