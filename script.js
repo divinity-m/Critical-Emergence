@@ -14,7 +14,8 @@ let player = {
     x: GAME_WIDTH*0.5, y: GAME_HEIGHT*0.5, r: 15,
     speed: GAME_WIDTH/275, baseSpeed: GAME_WIDTH/275,
     color: "#FFFFFFCC", subColor: "#E6E6E6",
-    weapon: "fist", img: document.getElementById("fist-icon"), inBattle: false,
+    inBattle: false, health: 100, shield: 0, mana: 250,
+    weapon: "fist", img: document.getElementById("fist-icon"),
     equipFist: function () { this.color = "#FFFFFFCC"; this.subColor = "#E6E6E6"; this.weapon = "fist"; this.img = document.getElementById("fist-icon"); },
     equipSword: function() { this.color = "#FF0000CC"; this.subColor = "#E60000"; this.weapon = "sword"; this.img = document.getElementById("sword-icon2"); },
 }
