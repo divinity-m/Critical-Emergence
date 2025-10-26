@@ -141,8 +141,7 @@ function roundRect(x, y, w, h, r, type) {
     else ctx.fill();
 }
 function drawStatBar(entity, x, y, w, h, lW, font, fill, stroke, stat) {
-    let barX = cnv.width*0.25, barY = cnv.height*0.01-cnv.height*0.035, barW = cnv.width*0.5, barH = cnv.height*0.035;
-    
+    if (stat === "SHIELD" && entity.shield <= 0) return;
     ctx.lineWidth = lW;
     ctx.font = `${font}px Verdana`;
     ctx.textAlign = "center";
@@ -153,8 +152,9 @@ function drawStatBar(entity, x, y, w, h, lW, font, fill, stroke, stat) {
     roundRect(x, y, entity.health / entity.maxHealth * w, h, 100, "fill");
     
     ctx.fillStyle = stroke;
-    if (stat != "HEALTH") ctx.fillText(`${stat}: ${entity.health}/${entity.maxHealth}`, x + w*0.5, y+h*0.75);
-    if (stat === "HEALTH" && entity.shield <= 0) ctx.fillText(`${stat}: ${entity.health}/${entity.maxHealth}`, x + w*0.5, y+h*0.75);
+    let lowercaseStat = stat.toLowerCase();
+    let maxStat = "max" + stat[0] + stat.substring(1).toLowerCase();
+    if (stat != "HEALTH" || (stat === "HEALTH" && entity.shield <= 0)) ctx.fillText(`${stat}: ${entity.[currentStat]}/${entity.[maxStat]}`, x + w*0.5, y+h*0.75);
 }
 
 // Game related functions
@@ -241,31 +241,19 @@ function drawEnemyBorderAndStats(enemy, w, borderColor) {
         }
         
         // Health Bar
-        let barX = cnv.width*0.25, barY = cnv.height*0.01-cnv.height*0.035, barW = cnv.width*0.5, barH = cnv.height*0.035;
-        drawStatBar(enemy, barX, barY, barW, barH, 10, cnv.height*0.02, "#00DD00", "#00BB00", "HEALTH");
-        
-        // ctx.lineWidth = 10;
-        // ctx.font = `${cnv.height*0.02}px Verdana`;
-        // ctx.textAlign = "center";
-        
-        // ctx.fillStyle = "#00DD00";
-        // ctx.strokeStyle = "#00BB00";
-        // roundRect(barX, barY, barW, barH, 100, "stroke");
-        // roundRect(barX, barY, enemy.health / enemy.maxHealth * barW, barH, 100, "fill");
-    
-        // ctx.fillStyle = "#00BB00";
-        // if (enemy.shield <= 0) ctx.fillText(`HEALTH: ${enemy.health}/${enemy.maxHealth}`, cnv.width*0.5, barY+barH*0.75);
+        let barX = GAME_WIDTH*0.25, barY = GAME_HEIGHT*0.05, barW = GAME_WIDTH*0.5, barH = GAME_HEIGHT*0.035;
+        drawStatBar(enemy, barX, barY, barW, barH, 10, GAME_HEIGHT*0.02, "#00DD00", "#00BB00", "HEALTH");
     }
 }
 
-console.log("slime health");
+console.log("slime health 2");
 function draw() {
     now = Date.now();
     detectHover();
     
     // Background #RRGGBBAA
     ctx.fillStyle = "#00C800";
-    ctx.fillRect(0, 0, cnv.width, cnv.height);
+    ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
     ctx.fillStyle = "#999999";
     ctx.font = "10px Verdana";
@@ -299,16 +287,16 @@ function draw() {
     if (now - dash.lastEnded <= 1500) {
         ctx.fillStyle = "#FFFFFF";
         ctx.lineWidth = 2;
-        roundRect(cnv.width-175, cnv.height*0.5-6.25, 150, 12.5, 6.25, "stroke");
-        roundRect(cnv.width-175, cnv.height*0.5-6.25, 150-(now-dash.lastEnded)/10, 12.5, 6.25, "fill");
+        roundRect(GAME_WIDTH-175, GAME_HEIGHT*0.5-6.25, 150, 12.5, 6.25, "stroke");
+        roundRect(GAME_WIDTH-175, GAME_HEIGHT*0.5-6.25, 150-(now-dash.lastEnded)/10, 12.5, 6.25, "fill");
 
         ctx.fillStyle = "#E6E6E6";
         ctx.font = "15px Verdana";
         ctx.textAlign = "right";
-        ctx.fillText("Dash", cnv.width-185, cnv.height*0.5+5);
+        ctx.fillText("Dash", GAME_WIDTH-185, GAME_HEIGHT*0.5+5);
         ctx.font = "10px Verdana";
         ctx.textAlign = "center";
-        ctx.fillText(`${(1.5-(now-dash.lastEnded)/1000).toFixed(2)}s`, cnv.width-100, cnv.height/2+10/3);
+        ctx.fillText(`${(1.5-(now-dash.lastEnded)/1000).toFixed(2)}s`, GAME_WIDTH-100, GAME_HEIGHT/2+10/3);
     }
 
     // Sword Statue
@@ -362,44 +350,11 @@ function draw() {
     }
 
     // Player Bars
-    let barY = cnv.height*0.9, barW = cnv.width*0.2, barH = cnv.height*0.025;
+    let barY = GAME_HEIGHT*0.925, barW = GAME_WIDTH*0.2, barH = GAME_HEIGHT*0.025;
     
-    drawStatBar(player, cnv.width*0.33-barW*0.5, barY, barW, barH, 5, cnv.height*0.0175, "#00DD00", "#00BB00", "HEALTH"); // Health Bar
-    drawStatBar(player, cnv.width*0.33-barW*0.5, barY, barW, barH, 5, cnv.height*0.0175, "#DDDD00", "#BBBB00", "SHIELD"); // Sheild Bar
-    drawStatBar(player, cnv.width*0.66-barW*0.5, barY, barW, barH, 5, cnv.height*0.0175, "#0000FF", "#0000BB", "MANA"); // Mana Bar
-    
-    // ctx.lineWidth = 5;
-    // ctx.font = `${cnv.height*0.0175}px Verdana`;
-    // ctx.textAlign = "center";
-    
-    // // Health Bar
-    // ctx.fillStyle = "#00DD00";
-    // ctx.strokeStyle = "#00BB00";
-    // roundRect(cnv.width*0.33-barW*0.5, barY, barW, barH, barR, "stroke");
-    // roundRect(cnv.width*0.33-barW*0.5, barY, player.health / player.maxHealth * barW, barH, barR, "fill");
-
-    // ctx.fillStyle = "#00BB00";
-    // if (player.shield <= 0) ctx.fillText(`HEALTH: ${player.health}/${player.maxHealth}`, cnv.width*0.33, barY+barH*0.75);
-
-    // // Shield Bar
-    // if (player.shield > 0) {
-    //     ctx.fillStyle = "#DDDD00";
-    //     ctx.strokeStyle = "#BBBB00";
-    //     roundRect(cnv.width*0.33-barW*0.5, barY, barW, barH, barR, "stroke");
-    //     roundRect(cnv.width*0.33-barW*0.5, barY, player.shield / player.maxShield * barW, barH, barR, "fill");
-
-    //     ctx.fillStyle = "#BBBB00";
-    //     ctx.fillText(`SHIELD: ${player.shield}/${player.maxShield}`, cnv.width*0.33, barY+barH*0.75);
-    // }
-
-    // // Mana Bar
-    // ctx.fillStyle = "#0000FF";
-    // ctx.strokeStyle = "#0000BB";
-    // roundRect(cnv.width*0.66-barW*0.5, barY, barW, barH, barR, "stroke");
-    // roundRect(cnv.width*0.66-barW*0.5, barY, player.mana / player.maxMana * barW, barH, barR, "fill");
-
-    // ctx.fillStyle = "#0000BB";
-    // ctx.fillText(`MANA: ${player.mana}/${player.maxMana}`, cnv.width*0.66, barY+barH*0.75);
+    drawStatBar(player, GAME_WIDTH*0.33-barW*0.5, barY, barW, barH, 5, GAME_HEIGHT*0.0175, "#00DD00", "#00BB00", "HEALTH"); // Health Bar
+    drawStatBar(player, GAME_WIDTH*0.33-barW*0.5, barY, barW, barH, 5, GAME_HEIGHT*0.0175, "#DDDD00", "#BBBB00", "SHIELD"); // Sheild Bar
+    drawStatBar(player, GAME_WIDTH*0.66-barW*0.5, barY, barW, barH, 5, GAME_HEIGHT*0.0175, "#0000FF", "#0000BB", "MANA"); // Mana Bar
 
     // Border
     ctx.strokeStyle = "#000000";
