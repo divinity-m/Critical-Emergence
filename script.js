@@ -39,16 +39,16 @@ let player = {
 let now = Date.now();
 let mapY = 0, mapX = 0;
 let dash = {
-    activated: false, accel: 1, lastEnded: 0,
+    activated: false, accel: 1, lastEnded: 0, color: "#FFFFFFCC", subColor: "#E6E6E6",
     use: function() {  
         player.speed += this.accel;
-        player.color = "#E6E6E6";
-        player.subColor = "#FFFFFF";
+        player.color = `${this.subColor}CC`;
+        player.subColor = this.color;
         if (player.speed >= player.baseSpeed*3 && this.accel === 1) this.accel = -1;
         if (this.accel === -1 && player.speed <= player.baseSpeed) {
             player.speed = player.baseSpeed;    
-            player.color = "#FFFFFF";
-            player.subColor = "#E6E6E6";
+            player.color = this.color;
+            player.subColor = this.subColor;
             this.activated = false;
             this.accel = 1;
             this.lastEnded = Date.now();
@@ -110,7 +110,7 @@ function keydownEventListener(e) {
     if (e.code === "KeyS" || e.code === "ArrowDown") moveDown = true;
     if (e.code === "KeyD" || e.code === "ArrowRight") moveRight = true;
     if (e.code === "ShiftLeft" || e.code === "ShiftRight") shiftPressed = 0.5;
-    if (e.code === "KeyQ" && now - dash.lastEnded > 1500) dash.activated = true;
+    if (e.code === "KeyQ" && now - dash.lastEnded > 1500 && !dash.activated) [dash.activated, dash.color, dash.subColor] = [true, player.color, player.subColor];
 }
 function keyupEventListener(e) {
     if (e.code === "KeyW" || e.code === "ArrowUp") moveUp = false;
