@@ -182,7 +182,7 @@ function makeSlime() {
         y: Math.random() * GAME_HEIGHT*2 - GAME_HEIGHT/2 + mapY,
         img: document.getElementById("slime-png"), sprite: 0,
         encountered: false, defeated: false,
-        maxHealth: Math.round(Math.random() * 50 + 100), maxShield: 0, shield: 0,a
+        maxHealth: Math.round(Math.random() * 50 + 100), maxShield: 0, shield: 0,
     }
     slime.health = slime.maxHealth;
 
