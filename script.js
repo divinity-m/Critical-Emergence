@@ -279,7 +279,7 @@ function draw() {
     ctx.fillStyle = "#00C800";
     ctx.fillRect(0, 0, cnv.width, cnv.height);
 
-    ctx.fillStyle = "#999999";
+    ctx.fillStyle = "#000000";
     ctx.font = "10px Verdana";
     ctx.textAlign = "left";
     ctx.fillText(`Map XY: ${Math.round(-mapX)}, ${Math.round(-mapY)}`, 15, 30);
