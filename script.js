@@ -25,7 +25,7 @@ let player = {
         do {
             randDistance = Math.random() * GAME_HEIGHT*0.48 - 50 - 1.375 - 1;
             randAngle = Math.random() * (Math.PI*2);
-            attack = { x: randDistance * Math.cos(randAngle) + GAME_WIDTH/2, y: randDistance * Math.sin(randAngle) + GAME_HEIGHT/2, };
+            attack = { x: randDistance * Math.cos(randAngle) + GAME_WIDTH/2, y: randDistance * Math.sin(randAngle) + GAME_HEIGHT/2, despawn: Date.now(),};
             distAtk = Math.hypot(attack.x - player.x, attack.y - player.y);
         }
         while (distAtk <= 150 + player.r+1.5+50+1)
@@ -365,15 +365,19 @@ function draw() {
         let atklen = player.spawnedAttacks.length;
         for (let i = atklen-1; i >= 0; i--) {
             let attack = player.spawnedAttacks[i];
+            if (now - attack.despawn > 13000) { player.spawnedAttacks.splice(i, 1); continue; }
+
+            ctx.fillStyle = `${attack.color}BF`;
+            circle(attack.x, attack.y, (13000 - (now - attack.despawn)) / 13000 * 50);
             
             ctx.strokeStyle = attack.color;
             ctx.lineWidth = 2;
             circle(attack.x, attack.y, 50, "stroke");
 
             ctx.fillStyle = attack.color;
-            ctx.font = "bold 15px Verdana";
+            ctx.font = "bold 17.5px Verdana";
             ctx.textAlign = "center";
-            ctx.fillText(attack.name, attack.x, attack.y+4.5);
+            ctx.fillText(attack.name.toUpperCase(), attack.x, attack.y+4.5);
 
             let distAttack = Math.hypot(player.x - attack.x, player.y - attack.y);
 
