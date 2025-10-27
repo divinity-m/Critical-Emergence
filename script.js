@@ -21,10 +21,15 @@ let player = {
     equipFist: function () { this.color = "#FFFFFFCC"; this.subColor = "#E6E6E6"; this.weapon = "fist"; this.img = document.getElementById("fist-icon"); },
     equipSword: function() { this.color = "#FF0000CC"; this.subColor = "#E60000"; this.weapon = "sword"; this.img = document.getElementById("sword-icon2"); },
     spawnedAttacks: [], newAttackCd: 0, spawnAttack: function () {
-        const randDistance = Math.random() * GAME_HEIGHT*0.48 - 50 - 1.375 - 1;
-        const randAngle = Math.random() * (Math.PI*2);
+        let randDistance, randAngle, attack, distAtk;
+        do {
+            randDistance = Math.random() * GAME_HEIGHT*0.48 - 50 - 1.375 - 1;
+            randAngle = Math.random() * (Math.PI*2);
+            attack = { x: randDistance * Math.cos(randAngle) + GAME_WIDTH/2, y: randDistance * Math.sin(randAngle) + GAME_HEIGHT/2, };
+            distAtk = Math.hypot(attack.x - player.x, attack.y - player.y);
+        }
+        while (distAtk <= 150 + player.r+1.5+50+1)
         
-        let attack = { x: randDistance * Math.cos(randAngle), y: randDistance * Math.sin(randAngle), };
         if (this.weapon === "fist") { [attack.damage, attack.name, attack.color] = [20, "punch", "#FFFFFF"]; }
         if (this.weapon === "sword") { [attack.damage, attack.name, attack.color] = [30, "slash", "#FF0000"]; }
         
@@ -147,28 +152,28 @@ function circle(x, y, r, type) {
 function roundRect(x, y, w, h, r, type) {
     ctx.beginPath();
     ctx.roundRect(x, y, w, h, r);
-    ctx.stroke();
     if (type === "stroke") ctx.stroke();
     else ctx.fill();
 }
 function drawStatBar(entity, x, y, w, h, lW, font, fill, stroke, stat) {
     if (stat === "SHIELD" && entity.shield <= 0) return;
-    ctx.lineWidth = lW;
-    ctx.font = `bold ${font}px Verdana`;
-    ctx.textAlign = "center";
-    
+
     const realStat = stat.toLowerCase();
     const maxStat = "max" + stat[0] + stat.substring(1).toLowerCase();
         
     ctx.fillStyle = fill;
     ctx.strokeStyle = stroke;
-    roundRect(x, y, w, h, 100, "stroke");
-    roundRect(x, y, entity[realStat]/entity[maxStat] * w, h, 100, "fill");
+    ctx.lineWidth = lW;
+    roundRect(x, y, entity[realStat]/entity[maxStat] * w, h, 1000, "fill");
+    roundRect(x, y, w, h, 1000, "stroke");
+
     
+    ctx.font = `bold ${font}px Verdana`;
+    ctx.textAlign = "center";
     ctx.fillStyle = stroke;
     if (stat != "HEALTH" || (stat === "HEALTH" && entity.shield <= 0)) {
         if (entity.type != "player") stat = `ENEMY ${stat}`;
-        ctx.fillText(`${stat}: ${entity[realStat]}/${entity[maxStat]}`, x + w*0.5, y+h*0.75);
+        ctx.fillText(`${stat}: ${entity[realStat]}/${entity[maxStat]}`, x + w*0.5, y+h*0.7);
     }
 }
 
@@ -234,6 +239,7 @@ function loopEncounterColor() {
 function enemyEncountered(enemy, w, distance, encounterDistance) {
     if (distance < encounterDistance && !player.inBattle) {
         player.inBattle = true;
+        player.newAttackCd = now - 4000;
         enemy.encountered = true;
         loopingEncounterColor = true;
         encColorCD = Date.now();
@@ -258,13 +264,13 @@ function drawEnemyBorderAndStats(enemy, w, borderColor) {
         }
 
         // Health and Shield Bar
-        const barX = GAME_WIDTH*0.05, barY = GAME_HEIGHT*0.075, barW = GAME_WIDTH*0.25, barH = GAME_HEIGHT*0.03;
-        drawStatBar(enemy, barX, barY, barW, barH, 7.5, GAME_HEIGHT*0.02, "#00DD00", "#00BB00", "HEALTH");
-        drawStatBar(enemy, barX, barY, barW, barH, 7.5, GAME_HEIGHT*0.02, "#DDDD00", "#BBBB00", "SHIELD");
+        const barX = GAME_WIDTH*0.05, barY = GAME_HEIGHT*0.075, barW = GAME_WIDTH*0.25, barH = GAME_HEIGHT*0.035;
+        drawStatBar(enemy, barX, barY, barW, barH, 5, GAME_HEIGHT*0.02, "#00DD00", "#00BB00", "HEALTH");
+        drawStatBar(enemy, barX, barY, barW, barH, 5, GAME_HEIGHT*0.02, "#DDDD00", "#BBBB00", "SHIELD");
     }
 }
 
-console.log("player abilities");
+console.log("player abilities 2");
 function draw() {
     now = Date.now();
     detectHover();
@@ -308,7 +314,7 @@ function draw() {
         roundRect(GAME_WIDTH-175, GAME_HEIGHT*0.5-6.25, 150, 12.5, 6.25, "stroke");
         roundRect(GAME_WIDTH-175, GAME_HEIGHT*0.5-6.25, 150-(now-dash.lastEnded)/10, 12.5, 6.25, "fill");
 
-        ctx.fillStyle = "#E6E6E6";
+        ctx.fillStyle = "#DFDFDF";
         ctx.font = "15px Verdana";
         ctx.textAlign = "right";
         ctx.fillText("Dash", GAME_WIDTH-185, GAME_HEIGHT*0.5+5);
@@ -352,12 +358,14 @@ function draw() {
 
     // Spawn Abilities During Battle
     if (player.inBattle) {
-        if (now - player.newAttackCd > 3000) {
+        if (now - player.newAttackCd > 5000) {
             player.spawnedAttacks.push(player.spawnAttack());
             player.newAttackCd = Date.now();
         }
-
-        for (let attack of player.spawnedAttacks) {
+        let atklen = player.spawnedAttacks.length;
+        for (let i = atklen-1; i >= 0; i--) {
+            let attack = player.spawnedAttacks[i];
+            
             ctx.strokeStyle = attack.color;
             ctx.lineWidth = 2;
             circle(attack.x, attack.y, 50, "stroke");
@@ -365,7 +373,7 @@ function draw() {
             ctx.fillStyle = attack.color;
             ctx.font = "bold 15px Verdana";
             ctx.textAlign = "center";
-            ctx.fillText(attack.name, attack.x, attack.y);
+            ctx.fillText(attack.name, attack.x, attack.y+4.5);
 
             let distAttack = Math.hypot(player.x - attack.x, player.y - attack.y);
 
@@ -376,6 +384,8 @@ function draw() {
 
                 encEnemy.shield = Math.max(0, encEnemy.shield);
                 encEnemy.health = Math.max(0, encEnemy.health);
+
+                player.spawnedAttacks.splice(i, 1);
             }
         }
     }
@@ -398,13 +408,13 @@ function draw() {
     }
 
     // Player Bars
-    const barY = GAME_HEIGHT*0.925, barW = GAME_WIDTH*0.2, barH = GAME_HEIGHT*0.025;
+    const barY = GAME_HEIGHT*0.925, barW = GAME_WIDTH*0.2, barH = GAME_HEIGHT*0.03;
     let [barX1, barX2] = [GAME_WIDTH*0.33-barW*0.5, GAME_WIDTH*0.66-barW*0.5];
     if (player.inBattle) [barX1, barX2] = [GAME_WIDTH*0.25-barW*0.5, GAME_WIDTH*0.75-barW*0.5];
     
-    drawStatBar(player, barX1, barY, barW, barH, 5, GAME_HEIGHT*0.0175, "#00DD00", "#00BB00", "HEALTH"); // Health Bar
-    drawStatBar(player, barX1, barY, barW, barH, 5, GAME_HEIGHT*0.0175, "#DDDD00", "#BBBB00", "SHIELD"); // Shield Bar
-    drawStatBar(player, barX2, barY, barW, barH, 5, GAME_HEIGHT*0.0175, "#0000FF", "#0000BB", "MANA"); // Mana Bar
+    drawStatBar(player, barX1, barY, barW, barH, 3, GAME_HEIGHT*0.0175, "#00DD00", "#00BB00", "HEALTH"); // Health Bar
+    drawStatBar(player, barX1, barY, barW, barH, 3, GAME_HEIGHT*0.0175, "#DDDD00", "#BBBB00", "SHIELD"); // Shield Bar
+    drawStatBar(player, barX2, barY, barW, barH, 3, GAME_HEIGHT*0.0175, "#0033FF", "#0000BB", "MANA"); // Mana Bar
 
     // Border
     ctx.strokeStyle = "#000000";
