@@ -21,10 +21,13 @@ let player = {
     equipFist: function () { this.color = "#FFFFFFCC"; this.subColor = "#E6E6E6"; this.weapon = "fist"; this.img = document.getElementById("fist-icon"); },
     equipSword: function() { this.color = "#FF0000CC"; this.subColor = "#E60000"; this.weapon = "sword"; this.img = document.getElementById("sword-icon2"); },
     spawnedAttacks: [], newAttackCd: 0, spawnAttack: function () {
-        let attack;
-        if (player.weapon === "fist") {
-            attack = { x: Math.random() * 100, y: Math.random() * 100, name: "punch", color: "#FFFFFF", };
-        }
+        const randDistance = Math.random() * GAME_HEIGHT*0.48 - 50 - 1.375 - 1;
+        const randAngle = Math.random() * (Math.PI*2);
+        
+        let attack = { x: randDistance * Math.cos(randAngle), y: randDistance * Math.sin(randAngle), };
+        if (this.weapon === "fist") { [attack.damage, attack.name, attack.color] = [20, "punch", "#FFFFFF"]; }
+        if (this.weapon === "sword") { [attack.damage, attack.name, attack.color] = [30, "slash", "#FF0000"]; }
+        
         return attack;
     },
 }
@@ -171,6 +174,7 @@ function drawStatBar(entity, x, y, w, h, lW, font, fill, stroke, stat) {
 
 // Game related functions
 let enemies = [];
+let encEnemy;
 function makeSlime() {
     let slime = { // width and height are 70
         type: "slime",
@@ -243,6 +247,7 @@ function drawEnemyBorderAndStats(enemy, w, borderColor) {
     if (enemy.encountered) {
         // Border Circle
         ctx.strokeStyle = borderColor;
+        ctx.lineWidth = 2.75;
         circle(enemy.x+w+mapX, enemy.y+w+mapY, GAME_HEIGHT*0.48, "stroke");
         if (loopingEncounterColor) {
             // Exclamation Mark
@@ -259,7 +264,7 @@ function drawEnemyBorderAndStats(enemy, w, borderColor) {
     }
 }
 
-console.log("divine, heavily adjust the dimensions of where attacks spawn by using trig");
+console.log("player abilities");
 function draw() {
     now = Date.now();
     detectHover();
@@ -348,18 +353,30 @@ function draw() {
     // Spawn Abilities During Battle
     if (player.inBattle) {
         if (now - player.newAttackCd > 3000) {
-            if (player.weapon === "fist") player.spawnedAttacks.push(player.spawnAttack());
+            player.spawnedAttacks.push(player.spawnAttack());
             player.newAttackCd = Date.now();
         }
 
         for (let attack of player.spawnedAttacks) {
             ctx.strokeStyle = attack.color;
+            ctx.lineWidth = 2;
             circle(attack.x, attack.y, 50, "stroke");
 
             ctx.fillStyle = attack.color;
             ctx.font = "bold 15px Verdana";
             ctx.textAlign = "center";
             ctx.fillText(attack.name, attack.x, attack.y);
+
+            let distAttack = Math.hypot(player.x - attack.x, player.y - attack.y);
+
+            if (distAttack <= player.r+1.5+50+1) {
+                if (encEnemy.shield > 0) encEnemy.shield -= attack.damage;
+                if (encEnemy.shield < 0) encEnemy.health += encEnemy.shield;
+                else if (encEnemy.shield === 0) encEnemy.health -= attack.damage;
+
+                encEnemy.shield = Math.max(0, encEnemy.shield);
+                encEnemy.health = Math.max(0, encEnemy.health);
+            }
         }
     }
 
@@ -377,6 +394,7 @@ function draw() {
             enemyEncountered(enemy, 35, Math.hypot(player.x - (enemy.x+35+mapX), player.y - (enemy.y+35+mapY)), GAME_WIDTH*0.0652);
             drawEnemyBorderAndStats(enemy, 35, "#00FF00");
         }
+        if (enemy.encountered) encEnemy = enemy;
     }
 
     // Player Bars
