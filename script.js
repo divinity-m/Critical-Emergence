@@ -13,7 +13,7 @@ const GAME_WIDTH = window.screen.width, GAME_HEIGHT = window.screen.height; // t
 let player = {
     type: "player",
     x: GAME_WIDTH*0.5, y: GAME_HEIGHT*0.5, r: 15,
-    speed: GAME_WIDTH/275, baseSpeed: GAME_WIDTH/275,
+    speed: GAME_WIDTH*0.0036, baseSpeed: GAME_WIDTH*0.0036,
     color: "#FFFFFFCC", subColor: "#E6E6E6",
     maxHealth: 100, maxShield: 0, maxMana: 250,
     health: 100, shield: 0, mana: 250,
@@ -182,12 +182,47 @@ let enemies = [];
 let encEnemy;
 function makeSlime() {
     let slime = { // width and height are 70
-        type: "slime",
+        type: "slime", img: document.getElementById("slime-png"), sprite: 0,
         x: Math.random() * GAME_WIDTH*2 - GAME_WIDTH/2 + mapX,
         y: Math.random() * GAME_HEIGHT*2 - GAME_HEIGHT/2 + mapY,
-        img: document.getElementById("slime-png"), sprite: 0,
-        encountered: false, defeated: false,
-        maxHealth: Math.round(Math.random() * 50 + 100), maxShield: 0, shield: 0,
+        encountered: false, maxHealth: Math.round(Math.random() * 50 + 100), maxShield: 0, shield: 0,
+        startX: 0, startY: 0, targetX: 0, targetY: 0, chargeCd: 0, chargeHit: false,
+        puddleX: 0, puddleY: 0, puddleA: 0, puddleCd: 0, puddleHit: false,
+        setAttackCooldowns: function () { this.chargeCd = now - 3000; this.puddleCd = now - 4000; },
+        attack: function () {
+            if (now - this.chargeCd > 6000) { // Charge
+                ctx.strokeStyle = "#00FF00";
+                ctx.lineWidth = 1.25;
+                circle(this.x, this.y, 20, "stroke");
+                
+                const [dxTarget, dyTarget] = [this.chargeX - this.startX, this.chargeY - this.startY];
+                const distTarget = Math.hypot(dxTarget, dyTarget);
+
+                this.x += dxTarget/distTarget * GAME_WIDTH*0.005;
+                this.y += dyTarget/distTarget * GAME_WIDTH*0.005;
+
+                const distSlime = Math.hypot(player.x - (this.x+35+mapX), player.y - (this.y+35+mapY));
+                if (!this.chargeHit && distSlime < 20 + player.r + 1.5 + 0.625) {
+                    damageTaken(player, 20);
+                    this.chargeHit = true;
+                }
+
+                if (distTarget < GAME_WIDTH*0.005+0.1) [this.chargeCd, this.chargeHit] = [Date.now(), false];
+            } else [this.startX, this.startY, this.chargeX, this.chargeY] = [this.x+35+mapX, this.y+35+mapY, player.x, player.y];
+            if (now - this.puddleCd > 5000) { // Puddle
+                ctx.fillStyle = `rgba(0, 250, 0, ${this.puddleA})`;
+                circle(this.puddleX, this.puddleY, 75);
+                this.puddleA += 0.005;
+
+                const distPuddle = Math.hypot(player.x - this.puddleX, player.y - this.puddleY);
+                if (this.puddleA >= 1 && !this.puddleHit && distPuddle < 75 + player.r + 1.5) {
+                    damageTaken(player, 15);
+                    this.puddleHit = true;
+                }
+                
+                if (this.puddleA > 4) [this.puddleCd, this.puddleHit, this.puddleA] = [Date.now(), false, 0];
+            } else [this.puddleX, this.puddleY] = [player.x, player.y];
+        },
     }
     slime.health = slime.maxHealth;
 
@@ -240,7 +275,9 @@ function enemyEncountered(enemy, w, distance, encounterDistance) {
     if (distance < encounterDistance && !player.inBattle) {
         player.inBattle = true;
         player.newAttackCd = now - 4000;
+        encEnemy = enemy;
         enemy.encountered = true;
+        enemy.setAttackCooldowns();
         loopingEncounterColor = true;
         encColorCD = Date.now();
         const addX = GAME_WIDTH/2 - (enemy.x+w+mapX);
@@ -270,7 +307,17 @@ function drawEnemyBorderAndStats(enemy, w, borderColor) {
     }
 }
 
-console.log("player abilities 2");
+function damageTaken(entity, damage) {
+    if (entity.shield > 0) entity.shield -= damage;
+    
+    if (entity.shield < 0) entity.health += entity.shield;
+    else if (entity.shield === 0) entity.health -= damage;
+    
+    entity.shield = Math.max(0, entity.shield);
+    entity.health = Math.max(0, entity.health);
+}
+
+console.log("enemy abilities");
 function draw() {
     now = Date.now();
     detectHover();
@@ -343,6 +390,9 @@ function draw() {
         if (player.weapon != "sword") ctx.fillText(`Equip Sword`, 1150+50+mapX, GAME_HEIGHT/2+75+mapY);
         else ctx.fillText(`Unequip Sword`, 1150+50+mapX, GAME_HEIGHT/2+75+mapY);
     }
+    
+    // Enemy Attacks
+    if (player.inBattle) encEnemy.attack();
 
     // Slime (Sprite Sheet Dimensions: Width - 800 | Height - 100)
     for (let slime of enemies) {
@@ -352,7 +402,8 @@ function draw() {
             if (now-slime.nextSprite > 200) { slime.sprite++; slime.nextSprite = Date.now(); }
             if (slime.sprite > 7) slime.sprite = 0;
             ctx.strokeStyle = "#00FF00";
-            if (!slime.encountered) circle(slime.x+35+mapX, slime.y+35+mapY, GAME_WIDTH*0.0652-player.r-1.5, "stroke");
+            ctx.lineWidth = 1.25;
+            if (!slime.encountered) circle(slime.x+35+mapX, slime.y+35+mapY, GAME_WIDTH*0.0652, "stroke");
         }
     }
 
@@ -365,30 +416,27 @@ function draw() {
         let atklen = player.spawnedAttacks.length;
         for (let i = atklen-1; i >= 0; i--) {
             let attack = player.spawnedAttacks[i];
+            // Despawn the attack and skip the loop if the despawn timer is up
             if (now - attack.despawn > 13000) { player.spawnedAttacks.splice(i, 1); continue; }
 
+            // Attacks Despawn Circle
             ctx.fillStyle = `${attack.color}BF`;
             circle(attack.x, attack.y, (13000 - (now - attack.despawn)) / 13000 * 50);
-            
+
+            // Attacks Outline Circle
             ctx.strokeStyle = attack.color;
             ctx.lineWidth = 2;
             circle(attack.x, attack.y, 50, "stroke");
 
+            // Attacks Image
             ctx.fillStyle = attack.color;
             ctx.font = "bold 17.5px Verdana";
             ctx.textAlign = "center";
             ctx.fillText(attack.name.toUpperCase(), attack.x, attack.y+4.5);
 
             let distAttack = Math.hypot(player.x - attack.x, player.y - attack.y);
-
             if (distAttack <= player.r+1.5+50+1) {
-                if (encEnemy.shield > 0) encEnemy.shield -= attack.damage;
-                if (encEnemy.shield < 0) encEnemy.health += encEnemy.shield;
-                else if (encEnemy.shield === 0) encEnemy.health -= attack.damage;
-
-                encEnemy.shield = Math.max(0, encEnemy.shield);
-                encEnemy.health = Math.max(0, encEnemy.health);
-
+                damageTaken(encEnemy, attack.damage);
                 player.spawnedAttacks.splice(i, 1);
             }
         }
@@ -405,10 +453,9 @@ function draw() {
     // Enemy Encountering, Border, and Health/Shield
     for (let enemy of enemies) {
         if (enemy.type === "slime") {
-            enemyEncountered(enemy, 35, Math.hypot(player.x - (enemy.x+35+mapX), player.y - (enemy.y+35+mapY)), GAME_WIDTH*0.0652);
+            enemyEncountered(enemy, 35, Math.hypot(player.x - (enemy.x+35+mapX), player.y - (enemy.y+35+mapY)), GAME_WIDTH*0.0652+player.r+1.5+0.625);
             drawEnemyBorderAndStats(enemy, 35, "#00FF00");
         }
-        if (enemy.encountered) encEnemy = enemy;
     }
 
     // Player Bars
