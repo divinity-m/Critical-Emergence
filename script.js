@@ -188,39 +188,41 @@ function makeSlime() {
         encountered: false, maxHealth: Math.round(Math.random() * 50 + 100), maxShield: 0, shield: 0,
         startX: 0, startY: 0, targetX: 0, targetY: 0, chargeCd: 0, chargeHit: false,
         puddleX: 0, puddleY: 0, puddleA: 0, puddleCd: 0, puddleHit: false,
-        setAttackCooldowns: function () { this.chargeCd = now - 3000; this.puddleCd = now - 4000; },
+        setAttackCooldowns: function () { this.chargeCd = now - 2000; this.puddleCd = now; },
         attack: function () {
-            if (now - this.chargeCd > 6000) { // Charge
+            if (now - this.chargeCd > 3500 && now - this.chargeCd < 4500) { // Charge Warning
                 ctx.strokeStyle = "#00FF00";
                 ctx.lineWidth = 1.25;
-                circle(this.x, this.y, 20, "stroke");
-                
-                const [dxTarget, dyTarget] = [this.chargeX - this.startX, this.chargeY - this.startY];
-                const distTarget = Math.hypot(dxTarget, dyTarget);
-
-                this.x += dxTarget/distTarget * GAME_WIDTH*0.005;
-                this.y += dyTarget/distTarget * GAME_WIDTH*0.005;
+                circle(this.x+35+mapX, this.y+35+mapY, 22.5, "stroke");
+                [this.startX, this.startY, this.targetX, this.targetY] = [this.x+35+mapX, this.y+35+mapY, player.x, player.y];
+            } else if (now - this.chargeCd >= 4500) { // Charge
+                const [dxTarget, dyTarget] = [this.targetX - this.startX, this.targetY - this.startY];
+                const distStartTarget = Math.hypot(dxTarget, dyTarget);
+                this.x += dxTarget/distStartTarget * GAME_WIDTH*0.005;
+                this.y += dyTarget/distStartTarget * GAME_WIDTH*0.005;
 
                 const distSlime = Math.hypot(player.x - (this.x+35+mapX), player.y - (this.y+35+mapY));
-                if (!this.chargeHit && distSlime < 20 + player.r + 1.5 + 0.625) {
+                if (!this.chargeHit && distSlime < 22.5 + player.r + 1.5 + 0.625) {
                     damageTaken(player, 20);
                     this.chargeHit = true;
                 }
 
-                if (distTarget < GAME_WIDTH*0.005+0.1) [this.chargeCd, this.chargeHit] = [Date.now(), false];
-            } else [this.startX, this.startY, this.chargeX, this.chargeY] = [this.x+35+mapX, this.y+35+mapY, player.x, player.y];
-            if (now - this.puddleCd > 5000) { // Puddle
+                const distTarget = Math.hypot(this.targetX - (this.x+35+mapX), this.targetY - (this.y+35+mapY));
+                if (distTarget < GAME_WIDTH*0.005+1) [this.chargeCd, this.chargeHit] = [Date.now(), false];
+            } else [this.startX, this.startY, this.targetX, this.targetY] = [this.x+35+mapX, this.y+35+mapY, player.x, player.y];
+            
+            if (now - this.puddleCd > 3500) { // Puddle
                 ctx.fillStyle = `rgba(0, 250, 0, ${this.puddleA})`;
-                circle(this.puddleX, this.puddleY, 75);
-                this.puddleA += 0.005;
+                circle(this.puddleX, this.puddleY, 100);
+                this.puddleA += 0.015;
 
                 const distPuddle = Math.hypot(player.x - this.puddleX, player.y - this.puddleY);
-                if (this.puddleA >= 1 && !this.puddleHit && distPuddle < 75 + player.r + 1.5) {
+                if (this.puddleA >= 1 && !this.puddleHit && distPuddle < 100 + player.r + 1.5) {
                     damageTaken(player, 15);
                     this.puddleHit = true;
                 }
                 
-                if (this.puddleA > 4) [this.puddleCd, this.puddleHit, this.puddleA] = [Date.now(), false, 0];
+                if (this.puddleA > 2.5) [this.puddleCd, this.puddleHit, this.puddleA] = [Date.now(), false, 0];
             } else [this.puddleX, this.puddleY] = [player.x, player.y];
         },
     }
@@ -291,7 +293,7 @@ function drawEnemyBorderAndStats(enemy, w, borderColor) {
         // Border Circle
         ctx.strokeStyle = borderColor;
         ctx.lineWidth = 2.75;
-        circle(enemy.x+w+mapX, enemy.y+w+mapY, GAME_HEIGHT*0.48, "stroke");
+        circle(GAME_WIDTH*0.5, GAME_HEIGHT*0.5, GAME_HEIGHT*0.48, "stroke");
         if (loopingEncounterColor) {
             // Exclamation Mark
             ctx.fillStyle = encounterColor;
@@ -317,7 +319,7 @@ function damageTaken(entity, damage) {
     entity.health = Math.max(0, entity.health);
 }
 
-console.log("enemy abilities");
+console.log("enemy abilities 2");
 function draw() {
     now = Date.now();
     detectHover();
