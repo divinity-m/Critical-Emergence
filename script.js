@@ -15,6 +15,7 @@ let player = {
     x: GAME_WIDTH*0.5, y: GAME_HEIGHT*0.5, r: 15,
     speed: GAME_WIDTH*0.0036, baseSpeed: GAME_WIDTH*0.0036,
     color: "#FFFFFFCC", subColor: "#E6E6E6",
+    exp: 0, maxExp: 100, level: 0,
     maxHealth: 100, maxShield: 0, maxMana: 250,
     health: 100, shield: 0, mana: 250,
     weapon: "fist", img: document.getElementById("fist-icon"), inBattle: false,
@@ -185,6 +186,7 @@ function makeSlime() {
         type: "slime", img: document.getElementById("slime-png"), sprite: 0,
         x: Math.random() * GAME_WIDTH*2 - GAME_WIDTH/2 + mapX,
         y: Math.random() * GAME_HEIGHT*2 - GAME_HEIGHT/2 + mapY,
+        exp: 25, level: 1,
         encountered: false, maxHealth: Math.round(Math.random() * 50 + 100), maxShield: 0, shield: 0,
         startX: 0, startY: 0, targetX: 0, targetY: 0, chargeCd: 0, chargeHit: false,
         puddleX: 0, puddleY: 0, puddleA: 0, puddleCd: 0, puddleHit: false,
@@ -227,6 +229,7 @@ function makeSlime() {
         },
     }
     slime.health = slime.maxHealth;
+    slime.spawnLocation = [slime.x, slime.y];
 
     function checkSlimeDistances() {
         let distSlime = Math.hypot(player.x - slime.x+35+mapX, player.y - slime.y+35+mapY); // player
@@ -274,7 +277,7 @@ function loopEncounterColor() {
 }
 
 function enemyEncountered(enemy, w, distance, encounterDistance) {
-    if (distance < encounterDistance && !player.inBattle) {
+    if (distance < encounterDistance && !player.inBattle && !enemy.encountered) {
         player.inBattle = true;
         player.newAttackCd = now - 4000;
         encEnemy = enemy;
@@ -319,7 +322,7 @@ function damageTaken(entity, damage) {
     entity.health = Math.max(0, entity.health);
 }
 
-console.log("enemy abilities 2");
+console.log("Death and Levels");
 function draw() {
     now = Date.now();
     detectHover();
@@ -394,7 +397,16 @@ function draw() {
     }
     
     // Enemy Attacks
-    if (player.inBattle) encEnemy.attack();
+    if (player.inBattle) {
+        encEnemy.attack();
+        if (player.health === 0) {
+            [player.x, player.y, mapX, mapY] = [GAME_WIDTH*0.5, GAME_HEIGHT*0.5, 0, 0];
+            [player.health, player.shield, player.mana] = [player.maxHealth, player.maxShield, player.maxMana];
+            [player.spawnedAttacks, player.inBattle] = [[], false];
+            [encEnemy.x, encEnemy.y] = [encEnemy.spawnLocation[0], encEnemy.spawnLocation[1]];
+            [encEnemy.health, encEnemy.shield, encEnemy.encountered] = [encEnemy.maxHealth, encEnemy.maxShield, false];
+        }
+    }
 
     // Slime (Sprite Sheet Dimensions: Width - 800 | Height - 100)
     for (let slime of enemies) {
@@ -415,8 +427,8 @@ function draw() {
             player.spawnedAttacks.push(player.spawnAttack());
             player.newAttackCd = Date.now();
         }
-        let atklen = player.spawnedAttacks.length;
-        for (let i = atklen-1; i >= 0; i--) {
+        
+        for (let i = player.spawnedAttacks.length-1; i >= 0; i--) {
             let attack = player.spawnedAttacks[i];
             // Despawn the attack and skip the loop if the despawn timer is up
             if (now - attack.despawn > 13000) { player.spawnedAttacks.splice(i, 1); continue; }
@@ -453,10 +465,25 @@ function draw() {
     ctx.drawImage(player.img, player.x-17.5, player.y-16, 35, 35);
 
     // Enemy Encountering, Border, and Health/Shield
-    for (let enemy of enemies) {
+    for (let i = enemies.length-1; i >= 0; i--) {
+        let enemy = enemies[i];
         if (enemy.type === "slime") {
             enemyEncountered(enemy, 35, Math.hypot(player.x - (enemy.x+35+mapX), player.y - (enemy.y+35+mapY)), GAME_WIDTH*0.0652+player.r+1.5+0.625);
             drawEnemyBorderAndStats(enemy, 35, "#00FF00");
+        }
+        
+        if (enemy.encountered && enemy.health === 0) {
+            player.exp += enemy.exp;
+            if (player.exp >= player.maxExp) {
+                player.level++;
+                player.exp -= player.maxExp;
+                player.maxExp = Math.floor(player.maxExp*1.5);
+            }
+            
+            
+            [player.health, player.shield, player.mana] = [player.maxHealth, player.maxShield, player.maxMana];
+            [player.spawnedAttacks, player.inBattle] = [[], false];
+            enemies.splice(i, 1);
         }
     }
 
