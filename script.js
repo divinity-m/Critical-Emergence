@@ -190,8 +190,8 @@ let encEnemy;
 function makeSlime() {
     let slime = { // width and height are 70
         type: "slime", img: document.getElementById("slime-png"), sprite: 0,
-        x: Math.random() * GAME_WIDTH*2 - GAME_WIDTH/2 + mapX,
-        y: Math.random() * GAME_HEIGHT*2 - GAME_HEIGHT/2 + mapY,
+        x: Math.random() * GAME_WIDTH*2 - GAME_WIDTH/2,
+        y: Math.random() * GAME_HEIGHT*2 - GAME_HEIGHT/2,
         exp: 25, level: 1,
         encountered: false, maxHealth: Math.round(Math.random() * 50 + 100), maxShield: 0, shield: 0,
         startX: 0, startY: 0, targetX: 0, targetY: 0, chargeCd: 0, chargeHit: false,
@@ -328,7 +328,7 @@ function damageTaken(entity, damage) {
     entity.health = Math.max(0, entity.health);
 }
 
-console.log("Exp bar and shield restoration");
+console.log("Shield restoration, slime respawning");
 function draw() {
     now = Date.now();
     detectHover();
@@ -415,8 +415,10 @@ function draw() {
     }
 
     // Slime (Sprite Sheet Dimensions: Width - 800 | Height - 100)
+    let slimeCount = 0;
     for (let slime of enemies) {
         if (slime.type === "slime") {
+            slimeCount++;
             // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
             ctx.drawImage(slime.img, 34.5 + 100 * slime.sprite, 35, 30, 30, slime.x+mapX, slime.y+mapY, 70, 70);
             if (now-slime.nextSprite > 200) { slime.sprite++; slime.nextSprite = Date.now(); }
@@ -426,6 +428,8 @@ function draw() {
             if (!slime.encountered) circle(slime.x+35+mapX, slime.y+35+mapY, GAME_WIDTH*0.0652, "stroke");
         }
     }
+    if (slimeCount < 5) enemies.push(makeSlime());
+    
 
     // Spawn Abilities During Battle
     if (player.inBattle) {
