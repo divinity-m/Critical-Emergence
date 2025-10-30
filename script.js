@@ -14,13 +14,19 @@ let player = {
     type: "player",
     x: GAME_WIDTH*0.5, y: GAME_HEIGHT*0.5, r: 15,
     speed: GAME_WIDTH*0.0036, baseSpeed: GAME_WIDTH*0.0036,
-    color: "#FFFFFFCC", subColor: "#E6E6E6",
+    color: "#FFFFFFCC", subColor: "#E6E6E6", levelColor: "#FFFFFF", levelSubColor: "#E6E6E6",
     exp: 0, maxExp: 100, level: 0,
     maxHealth: 100, maxShield: 0, maxMana: 250,
-    health: 100, shield: 0, mana: 250,
-    weapon: "fist", img: document.getElementById("fist-icon"), inBattle: false,
-    equipFist: function () { this.color = "#FFFFFFCC"; this.subColor = "#E6E6E6"; this.weapon = "fist"; this.img = document.getElementById("fist-icon"); },
-    equipSword: function() { this.color = "#FF0000CC"; this.subColor = "#E60000"; this.weapon = "sword"; this.img = document.getElementById("sword-icon2"); },
+    health: 100, shield: 0, mana: 250, 
+    weapon: "fist", img: document.getElementById("fist-icon"), inBattle: false, shieldRestore: 0,
+    equipFist: function () {
+        [this.color, this.subColor, this.levelColor, this.levelSubColor] = ["#FFFFFFCC", "#E6E6E6", "#FFFFFF", "#E6E6E6"];
+        [this.weapon, this.img] = ["fist", document.getElementById("fist-icon")];
+    },
+    equipSword: function() {
+        [this.color, this.subColor, this.levelColor, this.levelSubColor] = ["#FF0000CC", "#E60000", "#FF0000", "#E60000"];
+        [this.weapon, this.img] = ["sword", document.getElementById("sword-icon2")];
+    },
     spawnedAttacks: [], newAttackCd: 0, spawnAttack: function () {
         let randDistance, randAngle, attack, distAtk;
         do {
@@ -307,8 +313,8 @@ function drawEnemyBorderAndStats(enemy, w, borderColor) {
 
         // Health and Shield Bar
         const barX = GAME_WIDTH*0.05, barY = GAME_HEIGHT*0.075, barW = GAME_WIDTH*0.25, barH = GAME_HEIGHT*0.035;
-        drawStatBar(enemy, barX, barY, barW, barH, 5, GAME_HEIGHT*0.02, "#00DD00", "#00BB00", "HEALTH");
-        drawStatBar(enemy, barX, barY, barW, barH, 5, GAME_HEIGHT*0.02, "#DDDD00", "#BBBB00", "SHIELD");
+        drawStatBar(enemy, barX, barY, barW, barH, 10, GAME_HEIGHT*0.02, "#00DD00", "#00BB00", "HEALTH");
+        drawStatBar(enemy, barX, barY, barW, barH, 10, GAME_HEIGHT*0.02, "#DDDD00", "#BBBB00", "SHIELD");
     }
 }
 
@@ -322,7 +328,7 @@ function damageTaken(entity, damage) {
     entity.health = Math.max(0, entity.health);
 }
 
-console.log("Death and Levels");
+console.log("Exp bar and shield restoration");
 function draw() {
     now = Date.now();
     detectHover();
@@ -474,27 +480,48 @@ function draw() {
         
         if (enemy.encountered && enemy.health === 0) {
             player.exp += enemy.exp;
-            if (player.exp >= player.maxExp) {
-                player.level++;
-                player.exp -= player.maxExp;
-                player.maxExp = Math.floor(player.maxExp*1.5);
-            }
-            
-            
             [player.health, player.shield, player.mana] = [player.maxHealth, player.maxShield, player.maxMana];
             [player.spawnedAttacks, player.inBattle] = [[], false];
             enemies.splice(i, 1);
         }
     }
 
+    // Player Leveling
+    if (player.exp >= player.maxExp) {
+        player.level++;
+        player.exp -= player.maxExp;
+        player.maxExp = Math.floor(player.maxExp*1.5);
+    }
+
     // Player Bars
-    const barY = GAME_HEIGHT*0.925, barW = GAME_WIDTH*0.2, barH = GAME_HEIGHT*0.03;
-    let [barX1, barX2] = [GAME_WIDTH*0.33-barW*0.5, GAME_WIDTH*0.66-barW*0.5];
-    if (player.inBattle) [barX1, barX2] = [GAME_WIDTH*0.25-barW*0.5, GAME_WIDTH*0.75-barW*0.5];
+    const barW = GAME_WIDTH*0.21, barH = GAME_HEIGHT*0.03, lw = 9.5;
+    let [barY1, barY2] = [GAME_HEIGHT*0.925, GAME_HEIGHT*0.925];
+    let [barX1, barX2, barX3] = [GAME_WIDTH*0.25-barW*0.5, GAME_WIDTH*0.75-barW*0.5, GAME_WIDTH*0.50-barW*0.5];
+    if (player.inBattle) {
+        [barX1, barX2, barX3] = [GAME_WIDTH*0.2-barW*0.5, GAME_WIDTH*0.2-barW*0.5, GAME_WIDTH*0.8-barW*0.5];
+        [barY1, barY2] = [GAME_HEIGHT*0.925, GAME_HEIGHT*0.875];
+    }
     
-    drawStatBar(player, barX1, barY, barW, barH, 3, GAME_HEIGHT*0.0175, "#00DD00", "#00BB00", "HEALTH"); // Health Bar
-    drawStatBar(player, barX1, barY, barW, barH, 3, GAME_HEIGHT*0.0175, "#DDDD00", "#BBBB00", "SHIELD"); // Shield Bar
-    drawStatBar(player, barX2, barY, barW, barH, 3, GAME_HEIGHT*0.0175, "#0033FF", "#0000BB", "MANA"); // Mana Bar
+    drawStatBar(player, barX1, barY2, barW, barH, lw, GAME_HEIGHT*0.016, "#00DD00", "#00BB00", "HEALTH"); // Health Bar
+    drawStatBar(player, barX1, barY2, barW, barH, lw, GAME_HEIGHT*0.016, "#DDDD00", "#BBBB00", "SHIELD"); // Shield Bar
+    drawStatBar(player, barX2, barY1, barW, barH, lw, GAME_HEIGHT*0.016, "#0033FF", "#0000BB", "MANA"); // Mana Bar
+    drawStatBar(player, barX3, barY1, barW, barH, lw, GAME_HEIGHT*0.016, "#FFFF00", "#DDDD00", "EXP"); // Exp Bar
+    
+    ctx.fillStyle = player.levelColor;
+    ctx.strokeStyle = player.levelSubColor;
+    ctx.lineWidth = 4;
+    circle(barX3+barW*0.5, barY1-40, 25, "fill");
+    circle(barX3+barW*0.5, barY1-40, 25, "stroke");
+    ctx.lineWidth = 1;
+    ctx.textAlign = "center";
+    ctx.font = "20px Verdana";
+    ctx.strokeText(player.level, barX3+barW*0.5, barY1-33);
+
+    // Player Shield
+    if (player.shield < player.maxShield && now-player.shieldRestore > 7500) {
+        player.shield = player.maxShield;
+        player.shieldRestore = Date.now();
+    }
 
     // Border
     ctx.strokeStyle = "#000000";
